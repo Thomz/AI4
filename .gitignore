@@ -41,3 +41,11 @@ Thumbs.db
 *.JPG
 *.png
 *.bmp
+
+# Build files #
+######################
+CMakeList.txt
+CMakeCache.txt
+CMakeFiles
+*.cmake
+Makefile
