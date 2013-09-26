@@ -44,9 +44,15 @@ Thumbs.db
 
 # Build files #
 ######################
-CMakeLists.txt
+CMakeLists.txt*
+
 CMakeCache.txt
 CMakeFiles
 *.cmake
 Makefile
 ai4
+*.cproject
+.gitignore~
+*.project
+AI4
+
