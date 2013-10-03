@@ -15,22 +15,21 @@ string getInputObject(){
 	return inputObject;
 }
 
-Vector<KeyPoint> findObjectInDatabase(string inputObject){
+vector<KeyPoint> findObjectInDatabase(string inputObject){
 
 	vector<KeyPoint> result;
 
-	FileStorage fs("test.yml", FileStorage::READ);
+	FileStorage fs("database/" + inputObject + ".yml", FileStorage::READ);
 	if (fs.isOpened() == 0){
 		cout << "Object not found in database" << endl;
 		return result;
 	}
+
 	FileNode kptFileNode = fs["keypoints"];
 	read( kptFileNode, result);
 	fs.release();
-	cout << result.size() << endl;
 
 	return result;
-	;
 }
 
 int main(int argc, char **argv) {
@@ -38,6 +37,7 @@ int main(int argc, char **argv) {
 	string inputObject = getInputObject();
 	vector<KeyPoint> keypointsObject  = findObjectInDatabase(inputObject);
 
+	cout << keypointsObject.size() << endl;
 
 	Mat src = getImage();
 
@@ -51,9 +51,11 @@ int main(int argc, char **argv) {
 	for(int i=0; i<singleObjects.size(); i++){
 		getOverlay(src, singleObjects[i]);
 		keypoints = getKeypointsFromObject(singleObjects[i]);
-		drawKeypoints(singleObjects[i], keypoints, singleObjects[i]);
-		imshow(NumberToString(i), singleObjects[i]);
+		//drawKeypoints(singleObjects[i], keypoints, singleObjects[i]);
+		//imshow(NumberToString(i), singleObjects[i]);
 	}
+
+
 
 
 
