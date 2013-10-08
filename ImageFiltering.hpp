@@ -91,8 +91,45 @@ void getOverlay(Mat& orig, Mat& filtered){
 }
 
 Mat getImage(){
-	return imread("pics/1.png", CV_LOAD_IMAGE_UNCHANGED);
+	return imread("pics/10.png", CV_LOAD_IMAGE_UNCHANGED);
 
+}
+
+Mat getDescriptorsFromObject(Mat src, vector<KeyPoint> keypoints,	SiftDescriptorExtractor extractor){
+	Mat descriptor;
+	extractor.compute( src, keypoints, descriptor );
+	return descriptor;
+}
+
+void sortDescriptors(Mat databaseDesc, vector<Mat>& objects, 	FlannBasedMatcher matcher,vector< Mat> & images){
+	std::vector< DMatch > matches;
+
+	vector<double> dists;
+	double dist = 0;
+
+	for(int i = 0; i < objects.size(); i++){
+		matcher.match( databaseDesc, objects[i], matches );
+		for(int j = 0; j < 15; j++){
+			dist += matches[i].distance;
+		}
+		dist /= matches.size();
+		dists.push_back(dist);
+		dist = 0;
+	}
+
+	Mat tempDesc;
+	double tempDist;
+	Mat tempImg;
+
+	for( int i = 0; i < objects.size(); i++){
+		for(int j = 0; j < objects.size(); j++){
+			if(dists[i] < dists[j]){
+				tempDist = dists[i]; tempDesc=objects[i].clone(); tempImg = images[i].clone();
+				dists[i] = dists[j]; objects[i] = objects[j].clone(); images[i] = images[j].clone();
+				dists[j] = tempDist; objects[j] = tempDesc.clone(); images[j] = tempImg.clone();
+			}
+		}
+	}
 }
 
 vector<KeyPoint> getKeypointsFromObject(Mat src){
@@ -104,6 +141,5 @@ vector<KeyPoint> getKeypointsFromObject(Mat src){
 	///drawKeypoints(src, keypoints, output);
 
 	return keypoints;
-
 }
 
