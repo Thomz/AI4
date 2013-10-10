@@ -40,17 +40,6 @@ void saveObjectToDatabase(string objectName, Mat descriptor){
 	fs.release();
 }
 
-/*
-
-Mat findObjectInDatabase(string inputObject){
-	Mat desc = imread("database/" + inputObject + ".png", );
-	imshow("hej", desc);
-}
-
-void saveObjectInDatabase(string objectName, Mat descriptor){
-	imwrite("database/" + objectName + ".png", descriptor);
-}
-*/
 int main(int argc, char **argv) {
 
 	string inputObject = getInputObject();
@@ -81,18 +70,14 @@ int main(int argc, char **argv) {
 
 	Mat databaseDesc = findObjectInDatabase(inputObject);
 
+
+
 	if( databaseDesc.cols != 0){
 		FlannBasedMatcher matcher;
 		sortDescriptors(databaseDesc,descriptorVec,matcher, singleObjects);
 	}
 
-	for(int i = 0; i < singleObjects.size(); i++)
-		imshow(NumberToString(i+10), singleObjects[i]);
 
-
-	//	cout << keypointsObject.size() << endl;
-
-	//if( keypointsObject.size() < 1 )
 
 
 	waitKey();
