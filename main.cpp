@@ -1,7 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "queue"
 #include "ImageFiltering.hpp"
+#include "LearningClassifierSystem.h"
 
 #define showSingleObjectsWithKeypoints false
 
@@ -23,7 +23,6 @@ Mat findObjectInDatabase(string inputObject){
 
 	FileStorage fs("database/" + inputObject + ".yml", FileStorage::READ);
 	if (fs.isOpened() == 0){
-		cout << "Object not found in database" << endl;
 		return result;
 	}
 
@@ -34,53 +33,45 @@ Mat findObjectInDatabase(string inputObject){
 	return result;
 }
 
-void saveObjectToDatabase(string objectName, Mat descriptor){
-	FileStorage fs("database/" + objectName + ".yml", FileStorage::WRITE);
-	write( fs, "Descriptors", descriptor);
-	fs.release();
-}
 
 int main(int argc, char **argv) {
 
-	string inputObject = getInputObject();
+	LearningClassifierSystem LCS;
 
-	Mat src = getImage();
+	while(true){
 
-	Mat filtered;
-	vector<Mat> singleObjects;
-	singleObjects = filterSurrounding(src, filtered);
-	vector<KeyPoint> keypoints;
+		string inputObject = getInputObject();
 
-	Mat output;
-	Mat descriptor;
-	vector<Mat> descriptorVec;
+		Mat src = getImage();
 
-	SiftDescriptorExtractor extractor;
+		Mat filtered;
+		vector<Mat> singleObjects;
+		singleObjects = filterSurrounding(src, filtered);
+		vector<KeyPoint> keypoints;
 
-	for(int i=0; i<singleObjects.size(); i++){
-		getOverlay(src, singleObjects[i]);
-		keypoints = getKeypointsFromObject(singleObjects[i]);
-		descriptor = getDescriptorsFromObject(singleObjects[i],keypoints, extractor);
-		descriptorVec.push_back(descriptor.clone());
-		if(showSingleObjectsWithKeypoints){
-			drawKeypoints(singleObjects[i], keypoints, singleObjects[i]);
-			imshow(NumberToString(i), singleObjects[i]);
+		Mat output;
+		Mat descriptor;
+		vector<Mat> descriptorVec;
+
+		SiftDescriptorExtractor extractor;
+
+		for(int i=0; i<singleObjects.size(); i++){
+			getOverlay(src, singleObjects[i]);
+			keypoints = getKeypointsFromObject(singleObjects[i]);
+			descriptor = getDescriptorsFromObject(singleObjects[i],keypoints, extractor);
+			descriptorVec.push_back(descriptor.clone());
+			if(showSingleObjectsWithKeypoints){
+				drawKeypoints(singleObjects[i], keypoints, singleObjects[i]);
+				imshow(NumberToString(i), singleObjects[i]);
+			}
 		}
+
+		Mat databaseDesc = findObjectInDatabase(inputObject);
+
+		//LCS.learn(databaseDesc, descriptorVec, singleObjects, inputObject);
+
+		LCS.Test();
 	}
-
-	Mat databaseDesc = findObjectInDatabase(inputObject);
-
-
-
-	if( databaseDesc.cols != 0){
-		FlannBasedMatcher matcher;
-		sortDescriptors(databaseDesc,descriptorVec,matcher, singleObjects);
-	}
-
-
-
-
-	waitKey();
 
 	return 0;
 }
