@@ -11,7 +11,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
-//#include "ImageFiltering.hpp"
 
 using namespace std;
 using namespace cv;
@@ -24,9 +23,10 @@ public:
 	Mat getObjectFeatures(string& inputObject);
 	Mat getObjectWeights(string& inputObject);
 	void updateWeights(string& objectName, Mat& currentFeatures);
+	void filterFeaturesAndWeights(Mat& features, Mat& weights);
 	void saveObjectFeatures(string& objectName, Mat& currentFeatures);
 	void saveFeatureWeights(string& objectName, Mat& weights);
-	Mat findCorrectObject( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects);
+	Mat findCorrectObject( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, Mat nextImage);
 
 };
 
