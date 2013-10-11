@@ -33,13 +33,6 @@ Mat findObjectInDatabase(string inputObject){
 	return result;
 }
 
-void saveObjectToDatabase(string objectName, Mat descriptor){
-	FileStorage fs("database/" + objectName + ".yml", FileStorage::WRITE);
-	write( fs, "Descriptors", descriptor);
-	fs.release();
-}
-
-
 
 int main(int argc, char **argv) {
 
