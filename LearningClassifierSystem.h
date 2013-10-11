@@ -8,6 +8,11 @@
 #include <iostream>
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <fstream>
+
 
 #define matchesThreshold 200
 
@@ -40,12 +45,29 @@ private:
 
 	vector<GA> geneticAlgorithms;
 
-	int* voteForObject          (vector<Mat> descriptorsObjects,
-											  int gaNo);
+	void voteForObject      (vector<Mat> descriptorsObjects,
+										   int gaNo,
+										   int * votes);
 
 	void findFirstInstance      ( vector<Mat> descriptorsObjects,
 			                                      vector<Mat> singleObjects,
 			                                      string inputString);
+
+	void validateObject(vector<Mat> descriptorsObjects,
+										int gaNo,
+										int * votes,
+										vector<Mat> singleObjects);
+
+	void saveObjectToDatabase(string objectName,
+													string GAname,
+													Mat descriptor);
+
+	bool checkDirs(string objectName);
+
+	void load();
+
+	void save();
+
 };
 
 #endif /* LEARNINGCLASSIFIERSYSTEM_H_ */
