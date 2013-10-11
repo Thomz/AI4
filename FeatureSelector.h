@@ -21,11 +21,12 @@ public:
 	FeatureSelector();
 	virtual ~FeatureSelector();
 	void test();
-	Mat getObjectFeatures(string);
-	Mat getObjectWeights(string);
-	void updateWeights(string, Mat);
-	void saveObjectFeatures(string, Mat);
-	void saveFeatureWeights(string, Mat);
+	Mat getObjectFeatures(string& inputObject);
+	Mat getObjectWeights(string& inputObject);
+	void updateWeights(string& objectName, Mat& currentFeatures);
+	void saveObjectFeatures(string& objectName, Mat& currentFeatures);
+	void saveFeatureWeights(string& objectName, Mat& weights);
+	Mat findCorrectObject( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects);
 
 };
 
