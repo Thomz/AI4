@@ -8,7 +8,7 @@
 string getInputObject(){
 	string inputObject;
 
-	cout << "Write name of wanted object:" << endl;
+	cout << endl << "Write name of wanted object:" << endl;
 
 	cin >> inputObject;
 
@@ -33,16 +33,28 @@ Mat findObjectInDatabase(string inputObject){
 	return result;
 }
 
+void saveObjectToDatabase(string objectName, Mat descriptor){
+	FileStorage fs("database/" + objectName + ".yml", FileStorage::WRITE);
+	write( fs, "Descriptors", descriptor);
+	fs.release();
+}
+
+
 
 int main(int argc, char **argv) {
 
 	LearningClassifierSystem LCS;
-
+	int pic = 10;
 	while(true){
 
-		string inputObject = getInputObject();
+		Mat src = getImage(pic++);
 
-		Mat src = getImage();
+		namedWindow("Original", CV_WINDOW_NORMAL);
+		waitKey(100);
+		imshow("Original", src);
+		waitKey(1);
+		string inputObject = getInputObject();
+		destroyAllWindows();
 
 		Mat filtered;
 		vector<Mat> singleObjects;
@@ -68,9 +80,9 @@ int main(int argc, char **argv) {
 
 		Mat databaseDesc = findObjectInDatabase(inputObject);
 
-		//LCS.learn(databaseDesc, descriptorVec, singleObjects, inputObject);
+		LCS.learn(descriptorVec, singleObjects, inputObject);
 
-		LCS.Test();
+		//LCS.Test();
 	}
 
 	return 0;

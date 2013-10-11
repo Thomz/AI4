@@ -9,6 +9,8 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 
+#define matchesThreshold 200
+
 using namespace cv;
 using namespace std;
 
@@ -21,22 +23,29 @@ public:
 	LearningClassifierSystem();
 	virtual ~LearningClassifierSystem();
 
-	void Test();
-	void learn(Mat descriptorsDatabase, vector<Mat> descriptorsObjects, vector<Mat> singleObjects, string inputString);
+	void learn(vector<Mat> descriptorsObjects,
+				 	  vector<Mat> singleObjects,
+				 	  string inputString);
+
 
 private:
 	struct Chromosome{
-		vector<Mat> features;
-		double score;
+		Mat         features;
+		double   score;
 	};
 	struct GA{
-		string type;
-		vector <Chromosome> chromosomes;
+		string                              type;
+		vector <Chromosome>   chromosomes;
 	};
 
 	vector<GA> geneticAlgorithms;
 
-	void findFirstInstance( vector<Mat> descriptorsObjects, vector<Mat> singleObjects, string inputString);
+	int* voteForObject          (vector<Mat> descriptorsObjects,
+											  int gaNo);
+
+	void findFirstInstance      ( vector<Mat> descriptorsObjects,
+			                                      vector<Mat> singleObjects,
+			                                      string inputString);
 };
 
 #endif /* LEARNINGCLASSIFIERSYSTEM_H_ */

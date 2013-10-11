@@ -90,8 +90,8 @@ void getOverlay(Mat& orig, Mat& filtered){
 		}
 }
 
-Mat getImage(){
-	return imread("pics/10.png", CV_LOAD_IMAGE_UNCHANGED);
+Mat getImage(int i){
+	return imread("pics/" + NumberToString(i) + ".png", CV_LOAD_IMAGE_UNCHANGED);
 
 }
 
