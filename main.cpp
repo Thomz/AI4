@@ -3,7 +3,7 @@
 #include "ImageFiltering.hpp"
 #include "LearningClassifierSystem.h"
 
-#define showSingleObjectsWithKeypoints false
+#define showSingleObjectsWithKeypoints true
 
 string getInputObject(){
 	string inputObject;
@@ -17,37 +17,23 @@ string getInputObject(){
 	return inputObject;
 }
 
-Mat findObjectInDatabase(string inputObject){
-
-	Mat result;
-
-	FileStorage fs("database/" + inputObject + ".yml", FileStorage::READ);
-	if (fs.isOpened() == 0){
-		return result;
-	}
-
-	FileNode kptFileNode = fs["Descriptors"];
-	read( kptFileNode, result);
-	fs.release();
-
-	return result;
-}
-
-
 int main(int argc, char **argv) {
 
 	LearningClassifierSystem LCS;
-	int pic = 10;
+	int pic = 1;
 	while(true){
+		destroyAllWindows();
 
 		Mat src = getImage(pic++);
 
-		namedWindow("Original", CV_WINDOW_NORMAL);
-		waitKey(100);
-		imshow("Original", src);
+		namedWindow("Picture", CV_GUI_NORMAL);
+		waitKey(1000);
+		imshow("Picture", src);
 		waitKey(1);
 		string inputObject = getInputObject();
 		destroyAllWindows();
+
+		double t = (double)cv::getTickCount();
 
 		Mat filtered;
 		vector<Mat> singleObjects;
@@ -71,7 +57,11 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		Mat databaseDesc = findObjectInDatabase(inputObject);
+		waitKey();
+
+		cout << "Vision time:" <<  ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
+
+		//Mat databaseDesc = findObjectInDatabase(inputObject);
 
 		LCS.learn(descriptorVec, singleObjects, inputObject);
 

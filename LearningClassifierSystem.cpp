@@ -9,12 +9,14 @@
 
 LearningClassifierSystem::LearningClassifierSystem(){
 	cout << "LCS Created"<< endl;
+	id = 1000;
+	load();
 }
 LearningClassifierSystem::~LearningClassifierSystem(){
 }
 
 template <typename T>
-  string NumberToString ( T Number )
+string NumberToString ( T Number )
   {
      ostringstream ss;
      ss << Number;
@@ -23,6 +25,8 @@ template <typename T>
   }
 
 void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat> singleObjects, string inputString){
+	double t = (double)cv::getTickCount();
+
 	bool found = false;
 	int GAno;
 	  // Search already known GAs to find desired object
@@ -46,8 +50,20 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 			// Make all chromosomes for type vote which object should be chosen
 		voteForObject(descriptorsObjects,  GAno, votes);
 
-		validateObject(descriptorsObjects, GAno, votes, singleObjects);
+		cout << "Vote time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
+		t = (double)cv::getTickCount();
 
+			// Validate with user input that the correct object is chosen
+		int rightObject = validateObject(descriptorsObjects, GAno, votes, singleObjects);
+
+		cout << "Validate time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
+		t = (double)cv::getTickCount();
+
+			// Give scores to all the chromosomes
+		scoreGivingGA(GAno, rightObject);
+
+		cout << "Score giving time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
+		t = (double)cv::getTickCount();
 	}
 
 		// If objct is not aklready in database
@@ -63,17 +79,27 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 	return;
 }
 
-void LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, int * votes, vector<Mat> singleObjects){
+void LearningClassifierSystem::scoreGivingGA(int GAno, int rightObject){
+
+}
+
+int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, int * votes, vector<Mat> singleObjects){
 	// Instantiate highscores for use when sorting votes
 	int highscore(0), highscoreObj(0);
 
 	Mat tempDescriptorObject;
-	int tempVotes;
+	int tempVotes, tempNewObjID;
 	Mat tempSingleObjects;
+
+	int newObjectIDArr[descriptorsObjects.size()];
+
+	for(int i = 0; i < descriptorsObjects.size(); i++)
+		newObjectIDArr[i] = i;
 
 	for( int i = 0; i < descriptorsObjects.size(); i++){
 		for(int j = 0; j < descriptorsObjects.size(); j++){
 			if(votes[i] > votes[j]){
+				tempNewObjID = newObjectIDArr[i]; newObjectIDArr[i] = newObjectIDArr[j]; newObjectIDArr[j] = tempNewObjID;
 				tempDescriptorObject = descriptorsObjects[i].clone(); tempVotes = votes[i]; tempSingleObjects = singleObjects[i];
 				descriptorsObjects[i] = descriptorsObjects[j].clone(); votes[i] = votes[j]; singleObjects[i] = singleObjects[j].clone();
 				descriptorsObjects[j] = tempDescriptorObject.clone(); votes[j] = tempVotes; singleObjects[j] = tempSingleObjects.clone();
@@ -82,28 +108,26 @@ void LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, in
 	}
 		// Cout votes, to test that they are sorted!
 	for(int i = 0; i < descriptorsObjects.size(); i++)
-		cout << votes[i] << endl;
+		cout << "Original img " <<  NumberToString(newObjectIDArr[i]) << " got " <<  votes[i] << endl;
 
 		// String for userinput
 	string userInpt;
 
 		// Run through all sorted objects and ask the user which one is the right, hopefully the first one will be
 	for(int i = 0; i < descriptorsObjects.size() ; i++){
-			namedWindow("Highscore", CV_WINDOW_NORMAL);
+			namedWindow("Picture", CV_WINDOW_NORMAL);
 			waitKey(100);
-			imshow("Highscore", singleObjects[i]);
+			imshow("Picture", singleObjects[i]);
 			waitKey(1);
 			cout << "Is this the what you are looking for? (y/n)" << endl;
 			cin >> userInpt;
 			if(userInpt == "yes" ||userInpt == "Yes" || userInpt == "y" ){
-				Chromosome tempChr = {descriptorsObjects[i].clone(),0};
+				Chromosome tempChr = {descriptorsObjects[i].clone(),1, id};
+				id++;
 				geneticAlgorithms[gaNo].chromosomes.push_back(tempChr);
-				break;
+				return i;
 			}
 		}
-
-		// Show highest votes object
-	//imshow("highscore", singleObjects[0]);
 }
 
 void LearningClassifierSystem::voteForObject(vector<Mat> descriptorsObjects,  int gaNo, int * votes){
@@ -138,10 +162,11 @@ void LearningClassifierSystem::voteForObject(vector<Mat> descriptorsObjects,  in
 				highscoreObj = b;
 			}
 		}
-		votes[highscoreObj]++;
+		geneticAlgorithms[gaNo].chromosomes[i].lastVoteID = highscoreObj;
+		cout << geneticAlgorithms[gaNo].chromosomes[i].lastVoteID << endl;
+		votes[highscoreObj] += 1 * geneticAlgorithms[gaNo].chromosomes[i].score;
 	}
 }
-
 
 void LearningClassifierSystem::findFirstInstance( vector<Mat> descriptorsObjects, vector<Mat> singleObjects, string inputString){
 	string userInpt;
@@ -154,7 +179,8 @@ void LearningClassifierSystem::findFirstInstance( vector<Mat> descriptorsObjects
 		cout << "Is this the " <<  inputString << " you are looking for? (y/n)" << endl;
 		cin >> userInpt;
 		if(userInpt == "yes" ||userInpt == "Yes" || userInpt == "y" ){
-			Chromosome tempChr = {descriptorsObjects[i].clone(),0};
+			Chromosome tempChr = {descriptorsObjects[i].clone(),1, id};
+			id++;
 			GA tempGA;
 			tempGA.type = inputString;
 			tempGA.chromosomes.push_back(tempChr);
@@ -166,42 +192,107 @@ void LearningClassifierSystem::findFirstInstance( vector<Mat> descriptorsObjects
 }
 
 void LearningClassifierSystem::saveObjectToDatabase(string objectName, string GAname, Mat descriptor){
-	FileStorage fs("database/" + GAname + "/" + objectName +  ".yml", FileStorage::WRITE);
+	FileStorage fs("databaseLCS/" + GAname + "/" + objectName +  ".yml", FileStorage::WRITE);
 	write( fs, "Descriptors", descriptor);
 	fs.release();
 }
 
-void LearningClassifierSystem::load(){
+Mat LearningClassifierSystem::findObjectInDatabase(string idObject, string gaType){
 
+	Mat result;
+
+	FileStorage fs("databaseLCS/" + gaType + "/"+ idObject + ".yml", FileStorage::READ);
+	if (fs.isOpened() == 0){
+		cout << "load fail" << endl;
+		return result;
+	}
+
+	FileNode kptFileNode = fs["Descriptors"];
+	read( kptFileNode, result);
+	fs.release();
+
+	return result;
+}
+
+void LearningClassifierSystem::load(){
+	int highestId = id;
+	ifstream typesFile;
+	typesFile.open( "databaseLCS/types");
+	string tempType;
+	int types = 0;
+	typesFile >> types;
+	cout << "Objects found in database:" << endl;
+	geneticAlgorithms.clear();
+	for(int i = 0; i < types; i++){
+		typesFile >> tempType;
+		cout << tempType;
+		if( i != types-1)
+			cout << " - ";
+
+		GA tempGA;
+		tempGA.type = tempType;
+
+		ifstream resultFile;
+		string tempResult = "databaseLCS/" + tempType + "/result";
+		resultFile.open( tempResult.c_str());
+		int objects;
+		resultFile >> objects;
+		int tempID, tempScore;
+		for(int j = 0; j < objects; j++){
+			Chromosome tempChromo;
+			resultFile >> tempID;
+			if(tempID > highestId)
+				highestId = tempID;
+			resultFile >> tempScore;
+			tempChromo.features = findObjectInDatabase(NumberToString(tempID), tempType).clone();
+			//cout << endl << tempID << " - " << tempScore << endl;
+			tempChromo.id = tempID;
+			tempChromo.score = tempScore;
+			tempGA.chromosomes.push_back(tempChromo);
+		}
+
+		geneticAlgorithms.push_back(tempGA);
+
+	}
+
+	id = highestId+1;
 }
 
 void LearningClassifierSystem::save(){
+	ofstream typesFile;
+	string tempTxtTypes = "databaseLCS/types";
+	typesFile.open (tempTxtTypes.c_str());
+	typesFile << NumberToString(geneticAlgorithms.size()) + "\n";
 	for(int i = 0; i < geneticAlgorithms.size(); i++){
 		if(	!checkDirs(geneticAlgorithms[i].type)){
-			string tempString = "mkdir database/" + geneticAlgorithms[i].type;
+			string tempString = "mkdir databaseLCS/" + geneticAlgorithms[i].type;
 			int ret =  system(tempString.c_str());
 		}
 
-/*
+		typesFile << geneticAlgorithms[i].type + "\n" ;
+
 		ofstream myfile;
-		string tempTxt = "database/" + geneticAlgorithms[i].type + "result.txt";
+		string tempTxt = "databaseLCS/" + geneticAlgorithms[i].type + "/result";
 		myfile.open (tempTxt.c_str());
-		myfile << "Writing this to a file.\n";
-		myfile.close();
-		*/
+		myfile << NumberToString(geneticAlgorithms[i].chromosomes.size())<< endl;
 
 		for(int j = 0; j < geneticAlgorithms[i].chromosomes.size(); j++){
-			saveObjectToDatabase(NumberToString(j), geneticAlgorithms[i].type, geneticAlgorithms[i].chromosomes[j].features);
+			saveObjectToDatabase(NumberToString(geneticAlgorithms[i].chromosomes[j].id), geneticAlgorithms[i].type, geneticAlgorithms[i].chromosomes[j].features);
+			myfile << NumberToString(geneticAlgorithms[i].chromosomes[j].id) + "\n" + NumberToString(geneticAlgorithms[i].chromosomes[j].score) +  "\n";
 		}
+		myfile.close();
+
 	}
+	typesFile.close();
+
 }
 
 bool LearningClassifierSystem::checkDirs(string objectName){
-	string tempOpen = "database/" + objectName;
+	string tempOpen = "databaseLCS/" + objectName;
 	DIR* dir = opendir(tempOpen.c_str());
 	if (dir){
-		string tempDel = "rm database/" + objectName + "/*";
-		int ret = system(tempDel.c_str());
+		string tempDel = "rm databaseLCS/" + objectName + "/*";
+		//int ret = system(tempDel.c_str());
 		closedir(dir);
 		return true;
 	}
