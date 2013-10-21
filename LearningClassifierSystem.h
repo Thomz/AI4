@@ -62,7 +62,8 @@ private:
 	int validateObject(vector<Mat> descriptorsObjects,
 										int gaNo,
 										int * votes,
-										vector<Mat> singleObjects);
+										vector<Mat> singleObjects,
+										int* newObjectIDArr);
 
 	void scoreGivingGA(int GAno, int rightObject );
 

@@ -83,7 +83,7 @@ void LearningClassifierSystem::scoreGivingGA(int GAno, int rightObject){
 
 }
 
-int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, int * votes, vector<Mat> singleObjects){
+int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, int * votes, vector<Mat> singleObjects, int* newObjectIDArr){
 	// Instantiate highscores for use when sorting votes
 	int highscore(0), highscoreObj(0);
 
