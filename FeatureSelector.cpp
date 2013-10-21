@@ -7,7 +7,8 @@
 
 #include "FeatureSelector.h"
 
-#define maxFeatures 1000
+#define MAXFEATURES 1000
+#define DEGRADEFACTOR 0.9
 
 
 
@@ -68,10 +69,11 @@ void FeatureSelector::updateWeights(string& objectName, Mat& currentFeatures){
 		matcher.match( loadedFeatures, currentFeatures, matches );
 
 		for( int i = 0; i < matches.size(); i++ ){
-			if(matches[i].distance<200){
+			if(matches[i].distance<100){
 				weights.at<double>(matches[i].queryIdx,0)+=1;
 			}
 			else{
+				weights.at<double>(matches[i].queryIdx,0)*=DEGRADEFACTOR;
 				loadedFeatures.push_back(currentFeatures.row(matches[i].trainIdx));
 				weights.push_back(1.);
 			}
@@ -90,13 +92,14 @@ void FeatureSelector::updateWeights(string& objectName, Mat& currentFeatures){
 	}
 }
 
+
 void FeatureSelector::filterFeaturesAndWeights(Mat& features, Mat& weights){
-	if(weights.rows > maxFeatures*2){
+	if(weights.rows > MAXFEATURES*2){
 		double highest = 0;
 		int highestIndex=0;
 		Mat filteredFeatures;
 		Mat_<double> filteredWeights;
-		for(int i=0; i<maxFeatures*2; i++){
+		for(int i=0; i<MAXFEATURES*2; i++){
 			for(int j=0; j < weights.rows; j++){
 				if(weights.at<double>(j,0) > highest){
 					highest = weights.at<double>(j,0);
@@ -114,7 +117,7 @@ void FeatureSelector::filterFeaturesAndWeights(Mat& features, Mat& weights){
 			highestIndex=0;
 		}
 		int i=0;
-		while(filteredWeights.rows < maxFeatures){
+		while(filteredWeights.rows < MAXFEATURES){
 			if(weights.at<double>(weights.rows-1-i,0)!=-1){
 				filteredWeights.push_back(weights.at<double>(weights.rows-1-i,0));
 				filteredFeatures.push_back(features.row(weights.rows-1-i));
@@ -146,7 +149,7 @@ int FeatureSelector::compareFeatures(Mat& currentFeatures, Mat& loadedFeatures){
 	matcher.match( currentFeatures, loadedFeatures, matches );
 
 	for( int i = 0; i < matches.size(); i++ ){
-		if(matches[i].distance<200){
+		if(matches[i].distance<100){
 			noOfSimilarFeatures++;
 		}
 	}
