@@ -92,6 +92,22 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 void LearningClassifierSystem::updateGA(int GAno){
 	if(geneticAlgorithms[GAno].chromosomes.size() > maxChromosomes){
 		cout << "Chromosomes reached maximum, updating" << endl;
+
+		Chromosome tmpChr;
+
+		for(int i = 0; i < geneticAlgorithms[GAno].chromosomes.size(); i++){
+			for(int j = 0; j < geneticAlgorithms[GAno].chromosomes.size(); j++){
+				if(geneticAlgorithms[GAno].chromosomes[i].score > geneticAlgorithms[GAno].chromosomes[j].score){
+					tmpChr = geneticAlgorithms[GAno].chromosomes[i];
+					geneticAlgorithms[GAno].chromosomes[i] = geneticAlgorithms[GAno].chromosomes[j];
+					geneticAlgorithms[GAno].chromosomes[j] = tmpChr;
+				}
+			}
+		}
+
+		while(geneticAlgorithms[GAno].chromosomes.size() > chrCutdown)
+			geneticAlgorithms[GAno].chromosomes.pop_back();
+
 	}
 }
 
@@ -322,7 +338,7 @@ bool LearningClassifierSystem::checkDirs(string objectName){
 	DIR* dir = opendir(tempOpen.c_str());
 	if (dir){
 		string tempDel = "rm databaseLCS/" + objectName + "/*";
-		//int ret = system(tempDel.c_str());
+		int ret = system(tempDel.c_str());
 		closedir(dir);
 		return true;
 	}
