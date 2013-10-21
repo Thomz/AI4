@@ -26,7 +26,11 @@ public:
 	void filterFeaturesAndWeights(Mat& features, Mat& weights);
 	void saveObjectFeatures(string& objectName, Mat& currentFeatures);
 	void saveFeatureWeights(string& objectName, Mat& weights);
+	vector<int> sortDoubleVector(vector<int> indexVector, vector<int> valueVector);
+	int compareFeatures(Mat& featuresImg1, Mat& featuresImg2);
 	Mat findCorrectObject( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, Mat nextImage);
+	Mat findCorrectObjectSimple( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, Mat nextImage);
+
 
 };
 
