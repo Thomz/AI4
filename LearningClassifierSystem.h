@@ -17,6 +17,10 @@
 
 
 #define matchesThreshold 200
+#define rightUpCnt 0.1
+#define degFactor 0.9
+#define upperThres 2
+#define maxChromosomes 50
 
 using namespace cv;
 using namespace std;
@@ -53,7 +57,7 @@ private:
 
 	void voteForObject      (vector<Mat> descriptorsObjects,
 										   int gaNo,
-										   int * votes);
+										   double * votes);
 
 	void findFirstInstance      ( vector<Mat> descriptorsObjects,
 			                                      vector<Mat> singleObjects,
@@ -61,11 +65,14 @@ private:
 
 	int validateObject(vector<Mat> descriptorsObjects,
 										int gaNo,
-										int * votes,
+										double * votes,
 										vector<Mat> singleObjects,
 										int* newObjectIDArr);
 
-	void scoreGivingGA(int GAno, int rightObject );
+	void scoreGivingGA( int GAno,
+									 int rightObject,
+									 int* newObjectIDArr,
+									 vector<Mat> descriptorsObjects);
 
 
 	void saveObjectToDatabase(string objectName,
@@ -74,6 +81,8 @@ private:
 
 	Mat findObjectInDatabase(string idObject,
 												string gaType);
+
+	void updateGA(int GAno);
 
 
 	bool checkDirs(string objectName);

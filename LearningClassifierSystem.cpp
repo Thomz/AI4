@@ -41,7 +41,7 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 		cout << "Object already in database" << endl;
 
 			// Instantiate votes, to call with function voteForObject
-		int votes[descriptorsObjects.size()];
+		double votes[descriptorsObjects.size()];
 
 			// Clear votes array
 		for(int i = 0; i < sizeof(votes)/sizeof(votes[0]); i++)
@@ -50,23 +50,33 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 			// Make all chromosomes for type vote which object should be chosen
 		voteForObject(descriptorsObjects,  GAno, votes);
 
+		for(int i = 0; i < descriptorsObjects.size(); i++)
+			cout << votes[i] << endl;
+
 		cout << "Vote time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
 		t = (double)cv::getTickCount();
 
+		int newObjectIDArr[descriptorsObjects.size()];
+
 			// Validate with user input that the correct object is chosen
-		int rightObject = validateObject(descriptorsObjects, GAno, votes, singleObjects);
+		int rightObject = validateObject(descriptorsObjects, GAno, votes, singleObjects, newObjectIDArr);
 
 		cout << "Validate time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
 		t = (double)cv::getTickCount();
 
+		if(rightObject != -1){
 			// Give scores to all the chromosomes
-		scoreGivingGA(GAno, rightObject);
+			scoreGivingGA(GAno, rightObject, newObjectIDArr, descriptorsObjects);
+			updateGA(GAno);
+		}
+		else
+			cout << "No object validated" << endl;
 
 		cout << "Score giving time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
 		t = (double)cv::getTickCount();
 	}
 
-		// If objct is not aklready in database
+		// If object is not aklready in database
 	else{
 		cout << "Object not found in database" << endl;
 
@@ -79,19 +89,35 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 	return;
 }
 
-void LearningClassifierSystem::scoreGivingGA(int GAno, int rightObject){
-
+void LearningClassifierSystem::updateGA(int GAno){
+	if(geneticAlgorithms[GAno].chromosomes.size() > maxChromosomes){
+		cout << "Chromosomes reached maximum, updating" << endl;
+	}
 }
 
-int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, int * votes, vector<Mat> singleObjects, int* newObjectIDArr){
+void LearningClassifierSystem::scoreGivingGA(int GAno, int rightObject, int* newObjectIDArr, vector<Mat> descriptorsObjects){
+	/*for(int i = 0; i < descriptorsObjects.size(); i++)
+		cout << newObjectIDArr[i] << endl;*/
+
+	// newObject[XX]: XX = original place
+
+	for(int i =0 ; i < geneticAlgorithms[GAno].chromosomes.size(); i++){
+		if(newObjectIDArr[geneticAlgorithms[GAno].chromosomes[i].lastVoteID] == rightObject ){
+			if( geneticAlgorithms[GAno].chromosomes[i].score < upperThres )
+				geneticAlgorithms[GAno].chromosomes[i].score += rightUpCnt;
+		}
+		else
+			geneticAlgorithms[GAno].chromosomes[i].score *= degFactor;
+	}
+}
+
+int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, double * votes, vector<Mat> singleObjects, int* newObjectIDArr){
 	// Instantiate highscores for use when sorting votes
 	int highscore(0), highscoreObj(0);
 
 	Mat tempDescriptorObject;
-	int tempVotes, tempNewObjID;
+	double tempVotes, tempNewObjID;
 	Mat tempSingleObjects;
-
-	int newObjectIDArr[descriptorsObjects.size()];
 
 	for(int i = 0; i < descriptorsObjects.size(); i++)
 		newObjectIDArr[i] = i;
@@ -106,9 +132,6 @@ int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int
 			}
 		}
 	}
-		// Cout votes, to test that they are sorted!
-	for(int i = 0; i < descriptorsObjects.size(); i++)
-		cout << "Original img " <<  NumberToString(newObjectIDArr[i]) << " got " <<  votes[i] << endl;
 
 		// String for userinput
 	string userInpt;
@@ -128,10 +151,12 @@ int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int
 				return i;
 			}
 		}
+
+	return -1;
 }
 
-void LearningClassifierSystem::voteForObject(vector<Mat> descriptorsObjects,  int gaNo, int * votes){
-	int tempVotes[descriptorsObjects.size()];
+void LearningClassifierSystem::voteForObject(vector<Mat> descriptorsObjects,  int gaNo, double * votes){
+	double tempVotes[descriptorsObjects.size()];
 
 	FlannBasedMatcher matcher;
 	std::vector< DMatch > matches;
@@ -163,7 +188,10 @@ void LearningClassifierSystem::voteForObject(vector<Mat> descriptorsObjects,  in
 			}
 		}
 		geneticAlgorithms[gaNo].chromosomes[i].lastVoteID = highscoreObj;
-		cout << geneticAlgorithms[gaNo].chromosomes[i].lastVoteID << endl;
+
+			// Cout for printing what the different chromosomes voted for
+		//cout << geneticAlgorithms[gaNo].chromosomes[i].lastVoteID << endl;
+
 		votes[highscoreObj] += 1 * geneticAlgorithms[gaNo].chromosomes[i].score;
 	}
 }
@@ -237,7 +265,7 @@ void LearningClassifierSystem::load(){
 		resultFile.open( tempResult.c_str());
 		int objects;
 		resultFile >> objects;
-		int tempID, tempScore;
+		double tempID, tempScore;
 		for(int j = 0; j < objects; j++){
 			Chromosome tempChromo;
 			resultFile >> tempID;
@@ -256,6 +284,8 @@ void LearningClassifierSystem::load(){
 	}
 
 	id = highestId+1;
+
+	cout << endl;
 }
 
 void LearningClassifierSystem::save(){
