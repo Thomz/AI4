@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <fstream>
+#include <istream>
+#include <sys/time.h>
 
 
 #define matchesThreshold 200
@@ -37,11 +39,15 @@ private:
 	struct Chromosome{
 		Mat         features;
 		double   score;
+		int id;
+		int lastVoteID;
 	};
 	struct GA{
 		string                              type;
 		vector <Chromosome>   chromosomes;
 	};
+
+	int id;
 
 	vector<GA> geneticAlgorithms;
 
@@ -53,14 +59,21 @@ private:
 			                                      vector<Mat> singleObjects,
 			                                      string inputString);
 
-	void validateObject(vector<Mat> descriptorsObjects,
+	int validateObject(vector<Mat> descriptorsObjects,
 										int gaNo,
 										int * votes,
 										vector<Mat> singleObjects);
 
+	void scoreGivingGA(int GAno, int rightObject );
+
+
 	void saveObjectToDatabase(string objectName,
 													string GAname,
 													Mat descriptor);
+
+	Mat findObjectInDatabase(string idObject,
+												string gaType);
+
 
 	bool checkDirs(string objectName);
 
