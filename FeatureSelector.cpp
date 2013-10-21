@@ -7,7 +7,7 @@
 
 #include "FeatureSelector.h"
 
-#define maxFeatures 2000
+#define maxFeatures 1000
 
 
 
@@ -66,7 +66,6 @@ void FeatureSelector::updateWeights(string& objectName, Mat& currentFeatures){
 		FlannBasedMatcher matcher;
 		vector< DMatch > matches;
 		matcher.match( loadedFeatures, currentFeatures, matches );
-		cout << matches.size()<<endl;
 
 		for( int i = 0; i < matches.size(); i++ ){
 			if(matches[i].distance<200){
@@ -77,6 +76,7 @@ void FeatureSelector::updateWeights(string& objectName, Mat& currentFeatures){
 				weights.push_back(1.);
 			}
 		}
+		filterFeaturesAndWeights(loadedFeatures,weights);
 		saveObjectFeatures(objectName,loadedFeatures);
 		saveFeatureWeights(objectName,weights);
 	}
@@ -91,25 +91,38 @@ void FeatureSelector::updateWeights(string& objectName, Mat& currentFeatures){
 }
 
 void FeatureSelector::filterFeaturesAndWeights(Mat& features, Mat& weights){
-	if(weights.rows > maxFeatures){
+	if(weights.rows > maxFeatures*2){
 		double highest = 0;
 		int highestIndex=0;
 		Mat filteredFeatures;
 		Mat_<double> filteredWeights;
-		for(int i=0; i<2000; i++){
+		for(int i=0; i<maxFeatures*2; i++){
 			for(int j=0; j < weights.rows; j++){
-				if(weights.at<double>(j,0) > highest)
+				if(weights.at<double>(j,0) > highest){
 					highest = weights.at<double>(j,0);
 					highestIndex = j;
+				}
 			}
-			filteredFeatures.push_back(filteredFeatures.row(highestIndex));
+			if(highest==1){
+				cout << "no highest" << endl;
+				break;
+			}
+			filteredFeatures.push_back(features.row(highestIndex));
 			filteredWeights.push_back(weights.row(highestIndex));
 			weights.at<double>(highestIndex,0)=-1;
+			highest=0;
+			highestIndex=0;
 		}
-		if(filteredWeights.rows < 2000){
-			// NOT DONE!!
+		int i=0;
+		while(filteredWeights.rows < maxFeatures){
+			if(weights.at<double>(weights.rows-1-i,0)!=-1){
+				filteredWeights.push_back(weights.at<double>(weights.rows-1-i,0));
+				filteredFeatures.push_back(features.row(weights.rows-1-i));
+			}
+			i++;
 		}
-
+		features = filteredFeatures.clone();
+		weights = filteredWeights.clone();
 	}
 }
 
@@ -125,7 +138,82 @@ void FeatureSelector::saveFeatureWeights(string& objectName, Mat& weights){
 	fs.release();
 }
 
+int FeatureSelector::compareFeatures(Mat& currentFeatures, Mat& loadedFeatures){
+	int noOfSimilarFeatures = 0;
+
+	FlannBasedMatcher matcher;
+	vector< DMatch > matches;
+	matcher.match( currentFeatures, loadedFeatures, matches );
+
+	for( int i = 0; i < matches.size(); i++ ){
+		if(matches[i].distance<200){
+			noOfSimilarFeatures++;
+		}
+	}
+
+	return noOfSimilarFeatures;
+}
+
+vector<int> FeatureSelector::sortDoubleVector(vector<int> indexVector, vector<int> valueVector){
+	vector<int> sortedIndexes;
+	int indexOfHighestValue=0;
+	int highestValue=0;
+	for(int i=0; i<valueVector.size(); i++){
+		for(int j=0; j<valueVector.size(); j++){
+			if(valueVector[j] > highestValue)
+				indexOfHighestValue=j;
+				highestValue=valueVector[j];
+			}
+		sortedIndexes.push_back(indexVector[indexOfHighestValue]);
+		indexVector[indexOfHighestValue]=-1;
+		valueVector[indexOfHighestValue]=-1;
+		indexOfHighestValue=0;
+	}
+	return sortedIndexes;
+
+}
+
 Mat FeatureSelector::findCorrectObject( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, Mat nextImage){
+	string userInpt;
+	Mat descriptors;
+	Mat loadedDescriptors = getObjectFeatures(inputString);
+	if(loadedDescriptors.rows!=0){
+		vector<int> noOfMatches;
+		vector<int> indexVector;
+		for(int i = 0; i < descriptorsObjects.size() ; i++){
+			noOfMatches.push_back(compareFeatures(descriptorsObjects[i],loadedDescriptors));
+			indexVector.push_back(i);
+			}
+
+		vector<int> sorted = sortDoubleVector(indexVector,noOfMatches);
+
+		for(int i=0; i<sorted.size(); i++){
+			namedWindow("Picture", CV_WINDOW_NORMAL);
+			cout << "showing image: " << sorted[i] << " of: " << sorted.size() << endl;
+			//namedWindow("Next image", CV_WINDOW_NORMAL);
+			waitKey(100);
+			imshow("Picture", singleObjects[sorted[i]]);
+			//imshow("Next image", nextImage);
+			waitKey(1);
+			cout << "Please enter if this is " << inputString << endl;
+			cin >> userInpt;
+			if(userInpt == "yes" ||userInpt == "Yes" || userInpt == "y" ){
+				descriptors = descriptorsObjects[sorted[i]].clone();
+				return descriptors;
+			}
+		}
+
+
+	}
+	else{
+		descriptors=findCorrectObjectSimple(inputString,descriptorsObjects,singleObjects,nextImage);
+	}
+
+
+	return descriptors;
+}
+
+Mat FeatureSelector::findCorrectObjectSimple( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, Mat nextImage){
 	string userInpt;
 	Mat descriptors;
 	for(int i = 0; i < singleObjects.size() ; i++){

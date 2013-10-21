@@ -2,13 +2,14 @@
 #include <opencv2/opencv.hpp>
 #include "ImageFiltering.hpp"
 #include "LearningClassifierSystem.h"
+#include "FeatureSelector.h"
 
 #define showSingleObjectsWithKeypoints false
 
 string getInputObject(){
 	string inputObject;
 
-	cout << endl << "Write name of wanted object:" << endl;
+	cout << "Write name of wanted object:" << endl;
 
 	cin >> inputObject;
 
@@ -36,18 +37,14 @@ Mat findObjectInDatabase(string inputObject){
 
 int main(int argc, char **argv) {
 
-	LearningClassifierSystem LCS;
-	int pic = 10;
+	FeatureSelector FS;
+
+	int i = 5;
 	while(true){
 
-		Mat src = getImage(pic++);
-
-		namedWindow("Original", CV_WINDOW_NORMAL);
-		waitKey(100);
-		imshow("Original", src);
-		waitKey(1);
 		string inputObject = getInputObject();
-		destroyAllWindows();
+
+		Mat src = getImage(i);
 
 		Mat filtered;
 		vector<Mat> singleObjects;
@@ -56,7 +53,7 @@ int main(int argc, char **argv) {
 
 		Mat output;
 		Mat descriptor;
-		vector<Mat> descriptorVec;
+		vector<Mat > descriptorVec;
 
 		SiftDescriptorExtractor extractor;
 
@@ -70,12 +67,13 @@ int main(int argc, char **argv) {
 				imshow(NumberToString(i), singleObjects[i]);
 			}
 		}
+		descriptor = FS.findCorrectObject(inputObject, descriptorVec,singleObjects, imread("pics/" + NumberToString(i+1) + ".png", CV_LOAD_IMAGE_UNCHANGED)).clone();
+		if(descriptor.rows!=0)
+			FS.updateWeights(inputObject,descriptor);
 
-		Mat databaseDesc = findObjectInDatabase(inputObject);
 
-		LCS.learn(descriptorVec, singleObjects, inputObject);
-
-		//LCS.Test();
+		cout << "just processd img: " << i << endl;
+		i++;
 	}
 
 	return 0;
