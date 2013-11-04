@@ -20,7 +20,8 @@
 #define rightUpCnt 0.1
 #define degFactor 0.9
 #define upperThres 2
-#define maxChromosomes 50
+#define maxChromosomes 30
+#define chrCutdown 10
 
 using namespace cv;
 using namespace std;
