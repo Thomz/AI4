@@ -2,13 +2,14 @@
 #include <opencv2/opencv.hpp>
 #include "ImageFiltering.hpp"
 #include "LearningClassifierSystem.h"
+#include "FeatureSelector.h"
 
 #define showSingleObjectsWithKeypoints false
 
 string getInputObject(){
 	string inputObject;
 
-	cout << endl << "Write name of wanted object:" << endl;
+	cout << "Write name of wanted object:" << endl;
 
 	cin >> inputObject;
 
@@ -17,24 +18,32 @@ string getInputObject(){
 	return inputObject;
 }
 
+Mat findObjectInDatabase(string inputObject){
+
+	Mat result;
+
+	FileStorage fs("database/" + inputObject + ".yml", FileStorage::READ);
+	if (fs.isOpened() == 0){
+		return result;
+	}
+
+	FileNode kptFileNode = fs["Descriptors"];
+	read( kptFileNode, result);
+	fs.release();
+
+	return result;
+}
+
+
 int main(int argc, char **argv) {
 
-	LearningClassifierSystem LCS;
-	int pic = 1;
+	FeatureSelector FS;
+
+	int i = 65;
 	while(true){
-		destroyAllWindows();
 
-		Mat src = getImage(pic++);
-
-		namedWindow("Picture", CV_GUI_NORMAL);
-		waitKey(1000);
-		imshow("Picture", src);
-		waitKey(1);
-		string inputObject = getInputObject();
-		destroyAllWindows();
-
-		double t = (double)cv::getTickCount();
-
+		string inputObject = "cola";
+		Mat src = getImage(i);
 		Mat filtered;
 		vector<Mat> singleObjects;
 		singleObjects = filterSurrounding(src, filtered);
@@ -42,7 +51,7 @@ int main(int argc, char **argv) {
 
 		Mat output;
 		Mat descriptor;
-		vector<Mat> descriptorVec;
+		vector<Mat > descriptorVec;
 
 		SiftDescriptorExtractor extractor;
 
@@ -56,17 +65,15 @@ int main(int argc, char **argv) {
 				imshow(NumberToString(i), singleObjects[i]);
 			}
 		}
+		descriptor = FS.findCorrectObject(inputObject, descriptorVec,singleObjects, imread("pics/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED)).clone();
+		if(descriptor.rows!=0)
+			FS.updateWeights(inputObject,descriptor);
 
-		cout << "Vision time:" <<  ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
 
-		//Mat databaseDesc = findObjectInDatabase(inputObject);
-
-		LCS.learn(descriptorVec, singleObjects, inputObject);
-
-		//LCS.Test();
+		cout << "just processd img: " << i << endl;
+		i++;
 	}
 
 	return 0;
 }
-
 

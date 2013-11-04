@@ -91,7 +91,7 @@ void getOverlay(Mat& orig, Mat& filtered){
 }
 
 Mat getImage(int i){
-	return imread("pics/" + NumberToString(i) + ".png", CV_LOAD_IMAGE_UNCHANGED);
+	return imread("pics/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 
 }
 

@@ -8,7 +8,7 @@
 #include "FeatureSelector.h"
 
 #define MAXFEATURES 1000
-#define DEGRADEFACTOR 0.9
+#define DEGRADEFACTOR 0.8
 
 
 
@@ -66,15 +66,15 @@ void FeatureSelector::updateWeights(string& objectName, Mat& currentFeatures){
 		weights = getObjectWeights(objectName);
 		FlannBasedMatcher matcher;
 		vector< DMatch > matches;
-		matcher.match( loadedFeatures, currentFeatures, matches );
+		matcher.match( currentFeatures, loadedFeatures,  matches );
 
 		for( int i = 0; i < matches.size(); i++ ){
 			if(matches[i].distance<100){
-				weights.at<double>(matches[i].queryIdx,0)+=1;
+				weights.at<double>(matches[i].trainIdx,0)+=1;
 			}
 			else{
-				weights.at<double>(matches[i].queryIdx,0)*=DEGRADEFACTOR;
-				loadedFeatures.push_back(currentFeatures.row(matches[i].trainIdx));
+				weights.at<double>(matches[i].trainIdx,0)*=DEGRADEFACTOR;
+				loadedFeatures.push_back(currentFeatures.row(matches[i].queryIdx));
 				weights.push_back(1.);
 			}
 		}
