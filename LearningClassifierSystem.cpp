@@ -16,13 +16,14 @@ LearningClassifierSystem::~LearningClassifierSystem(){
 }
 
 template <typename T>
-string NumberToString ( T Number )
+  string NumberToString ( T Number )
   {
      ostringstream ss;
      ss << Number;
      return ss.str();
 	//mfskf
   }
+
 
 void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat> singleObjects, string inputString){
 	double t = (double)cv::getTickCount();
@@ -38,7 +39,7 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 	}
 
 	if( found ){
-		cout << "Object already in database" << endl;
+		//cout << "Object already in database" << endl;
 
 			// Instantiate votes, to call with function voteForObject
 		double votes[descriptorsObjects.size()];
@@ -50,18 +51,18 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 			// Make all chromosomes for type vote which object should be chosen
 		voteForObject(descriptorsObjects,  GAno, votes);
 
-		for(int i = 0; i < descriptorsObjects.size(); i++)
-			cout << votes[i] << endl;
+		//for(int i = 0; i < descriptorsObjects.size(); i++)
+			//cout << votes[i] << endl;
 
-		cout << "Vote time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
+		//cout << "Vote time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << "s"<< endl;
 		t = (double)cv::getTickCount();
 
 		int newObjectIDArr[descriptorsObjects.size()];
 
 			// Validate with user input that the correct object is chosen
-		int rightObject = validateObject(descriptorsObjects, GAno, votes, singleObjects, newObjectIDArr);
+		int rightObject = validateObject(descriptorsObjects, GAno, votes, singleObjects, newObjectIDArr, false);
 
-		cout << "Validate time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
+		//cout << "Validate time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << "s" << endl;
 		t = (double)cv::getTickCount();
 
 		if(rightObject != -1){
@@ -72,7 +73,7 @@ void LearningClassifierSystem::learn(vector<Mat> descriptorsObjects, vector<Mat>
 		else
 			cout << "No object validated" << endl;
 
-		cout << "Score giving time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
+		//cout << "Score giving time: " << ((double)cv::getTickCount() - t)/cv::getTickFrequency() << endl;
 		t = (double)cv::getTickCount();
 	}
 
@@ -127,7 +128,7 @@ void LearningClassifierSystem::scoreGivingGA(int GAno, int rightObject, int* new
 	}
 }
 
-int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, double * votes, vector<Mat> singleObjects, int* newObjectIDArr){
+int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int gaNo, double * votes, vector<Mat> singleObjects, int* newObjectIDArr, bool eval){
 	// Instantiate highscores for use when sorting votes
 	int highscore(0), highscoreObj(0);
 
@@ -152,21 +153,26 @@ int LearningClassifierSystem::validateObject(vector<Mat> descriptorsObjects, int
 		// String for userinput
 	string userInpt;
 
+	if(!eval){
 		// Run through all sorted objects and ask the user which one is the right, hopefully the first one will be
-	for(int i = 0; i < descriptorsObjects.size() ; i++){
-			namedWindow("Picture", CV_WINDOW_NORMAL);
-			waitKey(100);
-			imshow("Picture", singleObjects[i]);
-			waitKey(1);
-			cout << "Is this the what you are looking for? (y/n)" << endl;
-			cin >> userInpt;
-			if(userInpt == "yes" ||userInpt == "Yes" || userInpt == "y" ){
-				Chromosome tempChr = {descriptorsObjects[i].clone(),1, id};
-				id++;
-				geneticAlgorithms[gaNo].chromosomes.push_back(tempChr);
-				return i;
-			}
+		for(int i = 0; i < descriptorsObjects.size() ; i++){
+				namedWindow("Picture", CV_WINDOW_NORMAL);
+				waitKey(100);
+				imshow("Picture", singleObjects[i]);
+				waitKey(1);
+				cout << "Is this the what you are looking for? (y/n)" << endl;
+				cin >> userInpt;
+				if(userInpt == "yes" ||userInpt == "Yes" || userInpt == "y" ){
+					Chromosome tempChr = {descriptorsObjects[i].clone(),1, id};
+					id++;
+					geneticAlgorithms[gaNo].chromosomes.push_back(tempChr);
+					return i;
+				}
 		}
+	}
+	else{
+		return newObjectIDArr[0];
+	}
 
 	return -1;
 }
@@ -256,6 +262,39 @@ Mat LearningClassifierSystem::findObjectInDatabase(string idObject, string gaTyp
 	fs.release();
 
 	return result;
+}
+
+int LearningClassifierSystem::evaluateAll(vector<Mat> descriptorsObjects, vector<Mat> singleObjects, string inputString, int correctObject){
+
+		// GA Stuff from learn algorithms
+	bool found = false;
+	int GAno;
+	for(int i = 0; i < geneticAlgorithms.size(); i++){
+		if(geneticAlgorithms[i].type == inputString){
+			found = true;
+			GAno = i;
+		}
+	}
+
+
+		// Instantiate votes, to call with function voteForObject
+	double votes[descriptorsObjects.size()];
+
+		// Clear votes array
+	for(int i = 0; i < sizeof(votes)/sizeof(votes[0]); i++)
+	votes[i] = 0;
+
+	voteForObject(descriptorsObjects,  GAno, votes);
+
+	int newObjectIDArr[descriptorsObjects.size()];
+
+	int rightObject = validateObject(descriptorsObjects, GAno, votes, singleObjects, newObjectIDArr, true);
+
+	if(rightObject == correctObject)
+		return 1;
+
+	return 0;
+
 }
 
 void LearningClassifierSystem::load(){
