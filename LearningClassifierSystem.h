@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include <opencv2/nonfree/nonfree.hpp>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -18,10 +19,15 @@
 
 #define matchesThreshold 200
 #define rightUpCnt 0.1
-#define degFactor 0.9
+#define degFactor 0.8
 #define upperThres 2
 #define maxChromosomes 30
-#define chrCutdown 10
+#define chrCutdown 20
+#define startPic 30
+#define evaluationPics 11
+#define evaluation true
+#define evaluationObject "candle"
+
 
 using namespace cv;
 using namespace std;
@@ -38,6 +44,11 @@ public:
 	void learn(vector<Mat> descriptorsObjects,
 				 	  vector<Mat> singleObjects,
 				 	  string inputString);
+
+	int evaluateAll(vector<Mat> descriptorsObjects,
+							 vector<Mat> singleObjects,
+							 string inputString,
+							 int correctObject);
 
 
 private:
@@ -68,7 +79,8 @@ private:
 										int gaNo,
 										double * votes,
 										vector<Mat> singleObjects,
-										int* newObjectIDArr);
+										int* newObjectIDArr,
+										bool eval);
 
 	void scoreGivingGA( int GAno,
 									 int rightObject,
@@ -84,7 +96,6 @@ private:
 												string gaType);
 
 	void updateGA(int GAno);
-
 
 	bool checkDirs(string objectName);
 

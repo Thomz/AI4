@@ -1,44 +1,154 @@
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include "ImageFiltering.hpp"
-#include "LearningClassifierSystem.h"
-#include "FeatureSelector.h"
+#include "KohonenNetwork.h"
+
 
 #define showSingleObjectsWithKeypoints false
+
+vector<vector<Mat> > evaluateDescriptors;
+vector<vector<Mat> > evaluateObjects;
+
+struct color{
+	vector<double> rgb;
+};
+
+vector<color> colors;
+
 
 string getInputObject(){
 	string inputObject;
 
-	cout << "Write name of wanted object:" << endl;
+	//cout << endl << "Write name of wanted object:" << endl;
 
-	cin >> inputObject;
+	//cin >> inputObject;
+	inputObject = evaluationObject;
 
-	cout << "Looking for " + inputObject << endl;
+	//cout << "Looking for " + inputObject << endl;
 
 	return inputObject;
 }
 
-Mat findObjectInDatabase(string inputObject){
+void makeColors(){
+	color red, green, blue, yellow, black, white, purple, grey;
 
-	Mat result;
+	double redD[] = {1,0,0};
+	vector<double> redV(redD, redD+3);
+	red.rgb = redV;
+	colors.push_back(red);
 
-	FileStorage fs("database/" + inputObject + ".yml", FileStorage::READ);
-	if (fs.isOpened() == 0){
-		return result;
-	}
+	double greenD[] = {0.32,0.111,0.98};
+	vector<double> greenv(greenD, greenD+3);
+	green.rgb = greenv;
+	colors.push_back(green);
 
-	FileNode kptFileNode = fs["Descriptors"];
-	read( kptFileNode, result);
-	fs.release();
+	double blueD[] = {0,0,1};
+	vector<double> blueV(blueD, blueD+3);
+	blue.rgb = blueV;
+	colors.push_back(blue);
 
-	return result;
+	double yellowD[] = {1,1,0};
+	vector<double> yellowV(yellowD, yellowD+3);
+	yellow.rgb = yellowV;
+	colors.push_back(yellow);
+
+	double blackD[] = {0,0,0};
+	vector<double> blackV(blackD, blackD+3);
+	black.rgb = blackV;
+	colors.push_back(black);
+
+	double whiteD[] = {1,1,1};
+	vector<double> whiteV(whiteD, whiteD+3);
+	white.rgb = whiteV;
+	colors.push_back(white);
+/*
+	double purpleD[] = {128,0,128};
+	vector<double> purpleV(purpleD, purpleD+3);
+	purple.rgb = purpleV;
+	colors.push_back(purple);
+
+	double greyD[] = {128,128,128};
+	vector<double> greyV(greyD, greyD+3);
+	grey.rgb = greyV;
+	colors.push_back(grey);
+	*/
 }
+
+void readEvaluationSet(){
+	for(int i = 1; i <  evaluationPics ; i++){
+
+		Mat src = getImageEvaluation(i);
+
+		Mat filtered;
+		vector<Mat> singleObjects;
+		singleObjects = filterSurrounding(src, filtered);
+		vector<KeyPoint> keypoints;
+
+		Mat output;
+		Mat descriptor;
+		vector<Mat> descriptorVec;
+
+		SiftDescriptorExtractor extractor;
+
+		for(int j=0; j<singleObjects.size(); j++){
+			getOverlay(src, singleObjects[j]);
+			keypoints = getKeypointsFromObject(singleObjects[j]);
+			descriptor = getDescriptorsFromObject(singleObjects[j],keypoints, extractor);
+			descriptorVec.push_back(descriptor.clone());
+		}
+
+		evaluateDescriptors.push_back(descriptorVec);
+		evaluateObjects.push_back(singleObjects);
+
+	}
+	cout << "Evaluation set read" << endl;
+}
+
 
 
 int main(int argc, char **argv) {
 
-	FeatureSelector FS;
+	makeColors();
 
+	cout << "Program started" << endl;
+
+	KohonenNetwork KNN(200,3);
+	//KNN.printNetwork();
+
+	KNN.showAsImage("Before");
+
+	double tempD[] = {0.3, 0.4, 0.12, 0.2, 0.6};
+	vector<double> inVector(tempD, tempD+3);
+
+	cout << "Making kohonen network" << endl;;
+	for(int i = 0; i < totalIterations; i++){
+
+		int random =  (rand()%(5-0))+0;
+
+		inVector = colors[1].rgb;
+
+		for(int j = 0; j < 3; j++){
+			if((double) rand() / (RAND_MAX) > 0.5)
+				inVector[j] = 1;
+			else
+				inVector[j] = 0;
+			//cout <<(((double) i/totalIterations)*100 )<< endl;
+
+			//inVector[j] = (double) rand() / (RAND_MAX);
+		}
+
+		KNN.adjustWeights(inVector);
+	}
+	cout << " done" << endl;
+
+	KNN.showAsImage("After");
+
+	waitKey();
+
+
+	readEvaluationSet();
+
+	LearningClassifierSystem LCS;
+	int pic = startPic;
 	int i = 65;
 	while(true){
 
@@ -65,13 +175,28 @@ int main(int argc, char **argv) {
 				imshow(NumberToString(i), singleObjects[i]);
 			}
 		}
-		descriptor = FS.findCorrectObject(inputObject, descriptorVec,singleObjects, imread("pics/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED)).clone();
-		if(descriptor.rows!=0)
-			FS.updateWeights(inputObject,descriptor);
 
+		//cout << "Vision time: " <<  ((double)cv::getTickCount() - t)/cv::getTickFrequency() << "s" << endl;
 
-		cout << "just processd img: " << i << endl;
-		i++;
+		LCS.learn(descriptorVec, singleObjects, inputObject);
+
+			// Coca-cola
+		//int correctObjects[] = {1,2,3,1,2,3,1,1,4};
+			//Jagermeister
+		//int correctObjects[] = {2,2,2,1,1,3,1,1,0,3};
+			// Candle
+		int correctObjects[] = {3,0,1,2,0,0,1,1,2,1};
+
+		int correctGuesses = 0;
+		if(evaluation){
+			for(int i = 0; i <  evaluateDescriptors.size() ; i++){
+				int score = LCS.evaluateAll(evaluateDescriptors[i], evaluateObjects[i], inputObject,correctObjects[i-1]);
+				correctGuesses += score;
+			}
+
+			cout << "Evaluation - Correct percentage: " << (double)correctGuesses/(sizeof(correctObjects)/sizeof(correctObjects[0])) << endl;
+
+		}
 	}
 
 	return 0;

@@ -12,6 +12,11 @@ using namespace std;
 #define GRIDHEIGHT 2
 
 
+#include "LearningClassifierSystem.h"
+
+using namespace cv;
+using namespace std;
+
 template <typename T>
   string NumberToString ( T Number )
   {
@@ -35,7 +40,6 @@ vector<Mat> filterSurrounding(Mat& input, Mat& output){
 	//imshow("dilated",edges);
 	//erode(edges,edges,Mat(),Point(-1,-1),2);
 	//imshow("eroded",edges);
-
 
 	copyMakeBorder(edges,edges,2,2,2,2,BORDER_CONSTANT,0); // makes frame of black pixels
 
@@ -97,8 +101,20 @@ void getOverlay(Mat& orig, Mat& filtered){
 }
 
 Mat getImage(int i){
-	return imread("pics/eval/" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+	string temp = evaluationObject;
+	if(!evaluation)
+		return imread("pics/evaluation/" + temp + "/" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+	else
+		return imread("pics/training/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+}
 
+
+Mat getImageEvaluation(int i){
+	string temp = evaluationObject;
+	if(evaluation)
+		return imread("pics/evaluation/" + temp + "/" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+	else
+		return imread("pics/training/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 }
 
 Mat getDescriptorsFromObject(Mat src, vector<KeyPoint> keypoints,	SiftDescriptorExtractor extractor){
