@@ -2,6 +2,7 @@
 #include "ImageFiltering.hpp"
 #include "KohonenNetwork.h"
 
+
 #define showSingleObjectsWithKeypoints false
 
 vector<vector<Mat> > evaluateDescriptors;
@@ -102,6 +103,8 @@ void readEvaluationSet(){
 	cout << "Evaluation set read" << endl;
 }
 
+
+
 int main(int argc, char **argv) {
 
 	makeColors();
@@ -141,26 +144,16 @@ int main(int argc, char **argv) {
 
 	waitKey();
 
-	return 0;
 
 	readEvaluationSet();
 
 	LearningClassifierSystem LCS;
 	int pic = startPic;
+	int i = 65;
 	while(true){
-		//destroyAllWindows();
 
-		Mat src = getImage(pic++);
-
-		namedWindow("Picture", CV_GUI_NORMAL);
-		waitKey(1000);
-		imshow("Picture", src);
-		waitKey(1);
-		string inputObject = getInputObject();
-		destroyAllWindows();
-
-		double t = (double)cv::getTickCount();
-
+		string inputObject = "cola";
+		Mat src = getImage(i);
 		Mat filtered;
 		vector<Mat> singleObjects;
 		singleObjects = filterSurrounding(src, filtered);
@@ -168,7 +161,7 @@ int main(int argc, char **argv) {
 
 		Mat output;
 		Mat descriptor;
-		vector<Mat> descriptorVec;
+		vector<Mat > descriptorVec;
 
 		SiftDescriptorExtractor extractor;
 
@@ -204,10 +197,8 @@ int main(int argc, char **argv) {
 			cout << "Evaluation - Correct percentage: " << (double)correctGuesses/(sizeof(correctObjects)/sizeof(correctObjects[0])) << endl;
 
 		}
-
 	}
 
 	return 0;
 }
-
 

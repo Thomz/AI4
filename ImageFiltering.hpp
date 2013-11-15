@@ -98,6 +98,7 @@ Mat getImage(int i){
 		return imread("pics/training/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 }
 
+
 Mat getImageEvaluation(int i){
 	string temp = evaluationObject;
 	if(evaluation)
