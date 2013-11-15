@@ -238,4 +238,23 @@ Mat FeatureSelector::findCorrectObjectSimple( string& inputString, vector<Mat>& 
 
 }
 
+bool FeatureSelector::evaluateImg( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, int correctImg){
+	string userInpt;
+	Mat descriptors;
+	Mat loadedDescriptors = getObjectFeatures(inputString);
+	vector<int> noOfMatches;
+	vector<int> indexVector;
+	for(int i = 0; i < descriptorsObjects.size() ; i++){
+		noOfMatches.push_back(compareFeatures(descriptorsObjects[i],loadedDescriptors));
+		indexVector.push_back(i);
+		}
+
+	vector<int> sorted = sortDoubleVector(indexVector,noOfMatches);
+
+	if(correctImg==sorted[0]){
+		return true;
+	}
+	return false;
+}
+
 

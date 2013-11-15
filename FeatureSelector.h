@@ -30,6 +30,7 @@ public:
 	int compareFeatures(Mat& featuresImg1, Mat& featuresImg2);
 	Mat findCorrectObject( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, Mat nextImage);
 	Mat findCorrectObjectSimple( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, Mat nextImage);
+	bool evaluateImg( string& inputString, vector<Mat>& descriptorsObjects, vector<Mat>& singleObjects, int correctImg);
 
 
 };
