@@ -8,12 +8,13 @@
 vector<vector<Mat> > evaluateDescriptors;
 vector<vector<Mat> > evaluateObjects;
 
+KohonenNetwork KNN(200,GRIDHEIGHT*GRIDWIDTH*3);
+
 struct color{
 	vector<double> rgb;
 };
 
 vector<color> colors;
-
 
 string getInputObject(){
 	string inputObject;
@@ -104,18 +105,15 @@ void readEvaluationSet(){
 }
 
 void runKohonen(){
-	KohonenNetwork KNN(200,GRIDHEIGHT*GRIDWIDTH*3);
 	//KNN.printNetwork();
 
 	//KNN.showAsImage("Before");
 
-	double tempD[] = {0.3, 0.4, 0.12, 0.2, 0.6};
-	vector<double> inVector(tempD, tempD+(GRIDHEIGHT*GRIDWIDTH*3));
+	//double tempD[] = {0.3, 0.4, 0.12, 0.2, 0.6};
+	//vector<double> inVector(tempD, tempD+(GRIDHEIGHT*GRIDWIDTH*3));
 
-	cout << "Making kohonen network" << endl;;
+	cout << "Making kohonen network" << endl;
 	for(int i = 30; i < totalIterations; i++){
-
-
 		/*if((double) rand() / (RAND_MAX) > 0.5)
 			inVector[j] = 1;
 		else
@@ -126,18 +124,12 @@ void runKohonen(){
 
 		Mat src = getImage(i);
 
-
-
 		cout << i << endl;
 
 		Mat filtered;
 		vector<Mat> singleObjects;
 
-		cout << "tesT" << endl;
-
 		singleObjects = filterSurrounding(src, filtered);
-
-		cout << "SingleObjects Size: " << singleObjects.size() << endl;
 
 		vector<KeyPoint> keypoints;
 
@@ -166,8 +158,8 @@ void runKohonen(){
 				cout << customDesc[k] << endl;
 			}
 
-			imshow("temp", singleObjects[j]);
-			waitKey();
+			//imshow("temp", singleObjects[j]);
+			//waitKey();
 
 			cout << "kohonen" << endl;
 			KNN.adjustWeights(customDesc);
@@ -179,13 +171,43 @@ void runKohonen(){
 	cout << " done" << endl;
 
 	KNN.showAsImage("After");
-
-	waitKey();
 }
+
+void classifyKohonen(){
+
+	Mat src = getImageEvaluation(1);
+
+	Mat filtered;
+
+	vector<Mat> singleObjects;
+
+	singleObjects = filterSurrounding(src, filtered);
+
+	for(int j=0; j<1; j++){
+			getOverlay(src, singleObjects[j]);
+
+			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
+
+			imshow("Picture", singleObjects[j]);
+			string objectName;
+			//cin >> objectName;
+
+			//waitKey();
+
+			KNN.classifyBMU(customDesc,evaluationObject);
+		}
+}
+
 
 int main(int argc, char **argv) {
 
 	runKohonen();
+
+	KNN.getBMUs();
+
+	classifyKohonen();
+
+	waitKey();
 
 	return 0;
 

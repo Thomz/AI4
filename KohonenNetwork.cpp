@@ -29,6 +29,8 @@ KohonenNetwork::KohonenNetwork(int sizeMap, int sizeWeights) {
 		for(int j = 0; j < knnMap.size(); j++){
 			for(int k = 0; k < sizeWeights; k++){
 				knnMap[i][j].weights.push_back(((double) rand() / (RAND_MAX)));
+				knnMap[i][j].point = Point(i,j);
+				knnMap[i][j].object = "";
 				BMUcount[i][j] = 0;
 			}
 		}
@@ -53,7 +55,7 @@ void KohonenNetwork::printNetwork(){
 void KohonenNetwork::printBMUcount(){
 	for(int i = 0; i < BMUcount.size(); i++){
 		for(int j = 0; j < BMUcount.size(); j++){
-			cout << "[" <<  BMUcount[i][j]<< "]";
+			cout << "[" << knnMap[i][j].object << "]";
 		}
 		cout << endl;
 	}
@@ -148,3 +150,45 @@ void KohonenNetwork::showAsImage(string windowName){
 
 	imshow(windowName, image);
 }
+
+void KohonenNetwork::classifyBMU(vector<double> inputWieght, string objectName){
+
+	cout << "Classifying BMU" << endl;
+
+	double bestDistance(INFINITY), distance(0);
+	int bestBMU = 0;
+
+	for(int i = 0; i < BMUs.size(); i++){
+
+		for(int j = 0; j < weightSize; j++)
+			distance += pow(BMUs[i].weights[j] - inputWieght[j],2);
+
+		distance = sqrt(distance);
+
+		if(distance < bestDistance){
+			bestDistance = distance;
+			bestBMU = i;
+			cout << "BestBMU: "  << bestBMU << endl;
+		}
+
+		distance = 0;
+	}
+
+	knnMap[BMUs[bestBMU].point.x][BMUs[bestBMU].point.y].object = objectName;
+
+	Mat bmuIMG = Mat::ones(Size(mapSize,mapSize), CV_8UC3);
+	circle(bmuIMG, Point(BMUs[bestBMU].point.x,BMUs[bestBMU].point.y), 2, Scalar(255,255,255),2);
+	imshow("Candle", bmuIMG);
+
+}
+
+void KohonenNetwork::getBMUs(){
+	for(int i = 0; i < knnMap.size(); i++)
+		for(int j = 0; j < knnMap.size(); j++)
+			if(BMUcount[i][j] > totalIterations/35)
+				BMUs.push_back(knnMap[i][j]);
+
+}
+
+
+

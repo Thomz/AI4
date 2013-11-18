@@ -12,7 +12,7 @@
 #include <iomanip>
 #include "opencv2/opencv.hpp"
 
-#define totalIterations 35
+#define totalIterations 32
 #define startLearningRate 0.1
 #define showBMUimage true
 
@@ -31,10 +31,13 @@ class KohonenNetwork {
 public:
 	struct node{
 		vector<double> weights;
+		string object;
+		Point point;
 	};
 
 	vector<vector<node> > knnMap;
 	vector<vector<double> > BMUcount;
+	vector<node> BMUs;
 
 	KohonenNetwork(int size,  int sizeWeights);
 	virtual ~KohonenNetwork();
@@ -44,6 +47,9 @@ public:
 	pointStr findBestMatch(vector<double> inputVector);
 	void adjustWeights(vector<double> inputVector);
 	void showAsImage(string windowName);
+	void getBMUs();
+	void classifyBMU(vector<double> inputWieght, string objectName);
+
 
 
 

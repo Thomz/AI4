@@ -258,9 +258,6 @@ vector<double> getCustomObjectDescriptor(Mat input){
 		}
 	}
 
-
-
-
 	return avgs;
 }
 
