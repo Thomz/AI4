@@ -190,5 +190,23 @@ void KohonenNetwork::getBMUs(){
 
 }
 
+void KohonenNetwork::saveMap(){
+	ofstream myfile;
+	myfile.open ("map.txt");
+	myfile << mapSize << " " << weightSize << endl;
+
+	for(int i=0; i<mapSize; i++){
+		for(int j=0; j<mapSize; j++){
+			for(int k=0; k<weightSize; k++){
+				myfile << knnMap[i][j].weights[k];
+				myfile << ",";
+			}
+			myfile << endl;
+		}
+	}
+	myfile.close();
+}
+
+
 
 

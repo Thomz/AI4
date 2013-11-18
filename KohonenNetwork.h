@@ -11,6 +11,8 @@
 #include <math.h>
 #include <iomanip>
 #include "opencv2/opencv.hpp"
+#include <fstream>
+
 
 #define totalIterations 32
 #define startLearningRate 0.1
@@ -49,6 +51,8 @@ public:
 	void showAsImage(string windowName);
 	void getBMUs();
 	void classifyBMU(vector<double> inputWieght, string objectName);
+	void saveMap();
+
 
 
 
