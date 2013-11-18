@@ -103,53 +103,83 @@ void readEvaluationSet(){
 	cout << "Evaluation set read" << endl;
 }
 
-
-
-int main(int argc, char **argv) {
-
-	makeColors();
-
-	cout << "Program started" << endl;
-
-	KohonenNetwork KNN(200,3);
+void runKohonen(){
+	KohonenNetwork KNN(200,6);
 	//KNN.printNetwork();
 
 	KNN.showAsImage("Before");
 
 	double tempD[] = {0.3, 0.4, 0.12, 0.2, 0.6};
-	vector<double> inVector(tempD, tempD+3);
+	vector<double> inVector(tempD, tempD+6);
 
 	cout << "Making kohonen network" << endl;;
-	for(int i = 0; i < totalIterations; i++){
+	for(int i = 1; i < totalIterations; i++){
 
-		int random =  (rand()%(5-0))+0;
 
-		inVector = colors[1].rgb;
+		/*if((double) rand() / (RAND_MAX) > 0.5)
+			inVector[j] = 1;
+		else
+			inVector[j] = 0;*/
+		//cout <<(((double) i/totalIterations)*100 )<< endl;
 
-		for(int j = 0; j < 3; j++){
-			if((double) rand() / (RAND_MAX) > 0.5)
-				inVector[j] = 1;
-			else
-				inVector[j] = 0;
-			//cout <<(((double) i/totalIterations)*100 )<< endl;
+		//inVector[j] = (double) rand() / (RAND_MAX);
 
-			//inVector[j] = (double) rand() / (RAND_MAX);
+		Mat src = getImage(i);
+		cout << i << endl;
+
+		Mat filtered;
+		vector<Mat> singleObjects;
+		singleObjects = filterSurrounding(src, filtered);
+		vector<KeyPoint> keypoints;
+
+		Mat output;
+		Mat descriptor;
+		vector<Mat > descriptorVec;
+
+		cout << "New iteration" << endl;
+
+		SiftDescriptorExtractor extractor;
+
+		for(int i=0; i<singleObjects.size(); i++){
+			getOverlay(src, singleObjects[i]);
+			//keypoints = getKeypointsFromObject(singleObjects[i]);
+			//descriptor = getDescriptorsFromObject(singleObjects[i],keypoints, extractor);
+			//descriptorVec.push_back(descriptor.clone());
+			//if(showSingleObjectsWithKeypoints){
+			//	drawKeypoints(singleObjects[i], keypoints, singleObjects[i]);
+			//	imshow(NumberToString(i), singleObjects[i]);
+			//}
+			cout << "Custom desc" << endl;
+			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[i]);
+			cout << "kohonen" << endl;
+			KNN.adjustWeights(customDesc);
 		}
 
-		KNN.adjustWeights(inVector);
+		cout << "end" << endl;
 	}
+
 	cout << " done" << endl;
 
 	KNN.showAsImage("After");
 
 	waitKey();
+}
 
+int main(int argc, char **argv) {
+
+	runKohonen();
+
+	return 0;
+
+	//makeColors();
+
+	cout << "Program started" << endl;
 
 	readEvaluationSet();
 
 	LearningClassifierSystem LCS;
 	int pic = startPic;
-	int i = 65;
+	int i = 0;
 	while(true){
 
 		string inputObject = "cola";

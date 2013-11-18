@@ -12,7 +12,7 @@
 #include <iomanip>
 #include "opencv2/opencv.hpp"
 
-#define totalIterations 4000
+#define totalIterations 98
 #define startLearningRate 0.1
 #define showBMUimage true
 

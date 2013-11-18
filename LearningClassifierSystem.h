@@ -23,7 +23,7 @@
 #define upperThres 2
 #define maxChromosomes 30
 #define chrCutdown 20
-#define startPic 30
+#define startPic 1
 #define evaluationPics 11
 #define evaluation true
 #define evaluationObject "candle"

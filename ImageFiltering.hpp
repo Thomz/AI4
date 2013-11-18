@@ -165,46 +165,6 @@ vector<KeyPoint> getKeypointsFromObject(Mat src){
 	return keypoints;
 }
 
-
-vector<double> getCustomObjectDescriptor2(Mat singleObject){
-	vector<double> descriptor;
-	Mat src_gray;
-	Mat thresholdOutput;
-	vector < vector <cv::Point> > contours;
-	vector<Vec4i> hierarchy;
-	vector<Mat> filtered;
-	cout << "1" << endl;
-	/// Convert image to gray and blur it
-	filtered = filterSurrounding(singleObject, singleObject);
-	cout << "2" << endl;
-	assert(filtered[0].type() == CV_8UC3);
-	cout << "3" << endl;
-
-	findContours(filtered[0], contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	cout << "4" << endl;
-
-
-	RotatedRect ellipse1;
-	ellipse1 = fitEllipse(Mat(contours[0]));
-	RNG rng(12345);
-	cout << "lala1" << endl;
-
-	Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-	cout << "lala2" << endl;
-	ellipse( filtered[0] ,ellipse1, color, 2, 8 );
-	cout << "lala3" << endl;
-
-	imshow("s",filtered[0]);
-
-
-	//blur( src_gray, src_gray, Size(3,3) );
-
-
-	waitKey(0);
-
-	return descriptor;
-}
-
 void rotate(Mat& src, double angle, Mat& dst)
 {
     int len = max(src.cols, src.rows);
@@ -215,6 +175,7 @@ void rotate(Mat& src, double angle, Mat& dst)
 }
 
 vector<double> getCustomObjectDescriptor(Mat input){
+	copyMakeBorder(input,input,200,200,200,200,BORDER_CONSTANT, Scalar(0,0,0));
 	Mat gray;
 	vector<double> avgs;
 	cvtColor(input, gray, CV_BGR2GRAY);
@@ -273,7 +234,7 @@ vector<double> getCustomObjectDescriptor(Mat input){
 
 	for(int k=0; k<GRIDWIDTH; k++){
 		for(int l=0; l<GRIDHEIGHT; l++){
-			int currentSum=0;
+			double currentSum=0;
 			int pixels= hsv.rows/GRIDHEIGHT * (hsv.cols/GRIDWIDTH);
 
 			for(int y=0+(l*(hsv.rows/GRIDHEIGHT)); y<hsv.rows/GRIDHEIGHT+(l*(hsv.rows/GRIDHEIGHT)); y++ ){
@@ -286,13 +247,10 @@ vector<double> getCustomObjectDescriptor(Mat input){
 					}
 				}
 			}
-			avgs.push_back(currentSum/pixels);
+			avgs.push_back((currentSum/pixels)/180);
 		}
 	}
-	for(int i=0; i<avgs.size();i++){
-		cout << avgs[i] << endl;
-	}
-	waitKey();
+
 
 
 
