@@ -231,23 +231,30 @@ vector<double> getCustomObjectDescriptor(Mat input){
 	Mat ROI = rotatedInput(rect);
 	Mat hsv;
 	cvtColor(ROI, hsv, CV_BGR2HSV);
+	Mat bgr = ROI.clone();
 
 	for(int k=0; k<GRIDWIDTH; k++){
 		for(int l=0; l<GRIDHEIGHT; l++){
-			double currentSum=0;
-			int pixels= hsv.rows/GRIDHEIGHT * (hsv.cols/GRIDWIDTH);
+			double currentSumR=0;
+			double currentSumG=0;
+			double currentSumB=0;
+			int pixels= bgr.rows/GRIDHEIGHT * (bgr.cols/GRIDWIDTH);
 
-			for(int y=0+(l*(hsv.rows/GRIDHEIGHT)); y<hsv.rows/GRIDHEIGHT+(l*(hsv.rows/GRIDHEIGHT)); y++ ){
-				for(int x=0+(k*(hsv.cols/GRIDWIDTH)); x<hsv.cols/GRIDWIDTH+(k*(hsv.cols/GRIDWIDTH)); x++){
+			for(int y=0+(l*(bgr.rows/GRIDHEIGHT)); y<bgr.rows/GRIDHEIGHT+(l*(bgr.rows/GRIDHEIGHT)); y++ ){
+				for(int x=0+(k*(bgr.cols/GRIDWIDTH)); x<bgr.cols/GRIDWIDTH+(k*(bgr.cols/GRIDWIDTH)); x++){
 					if(hsv.at<Vec3b>(y,x)[2]>5){
-						currentSum+=hsv.at<Vec3b>(y,x)[0];
+						currentSumB+=bgr.at<Vec3b>(y,x)[0];
+						currentSumG+=bgr.at<Vec3b>(y,x)[1];
+						currentSumR+=bgr.at<Vec3b>(y,x)[2];
 					}
 					else{
 						pixels--;
 					}
 				}
 			}
-			avgs.push_back((currentSum/pixels)/180);
+			avgs.push_back((currentSumB/pixels)/255);
+			avgs.push_back((currentSumG/pixels)/255);
+			avgs.push_back((currentSumR/pixels)/255);
 		}
 	}
 

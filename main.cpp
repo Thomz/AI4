@@ -104,16 +104,16 @@ void readEvaluationSet(){
 }
 
 void runKohonen(){
-	KohonenNetwork KNN(200,6);
+	KohonenNetwork KNN(200,GRIDHEIGHT*GRIDWIDTH*3);
 	//KNN.printNetwork();
 
-	KNN.showAsImage("Before");
+	//KNN.showAsImage("Before");
 
 	double tempD[] = {0.3, 0.4, 0.12, 0.2, 0.6};
-	vector<double> inVector(tempD, tempD+6);
+	vector<double> inVector(tempD, tempD+(GRIDHEIGHT*GRIDWIDTH*3));
 
 	cout << "Making kohonen network" << endl;;
-	for(int i = 1; i < totalIterations; i++){
+	for(int i = 30; i < totalIterations; i++){
 
 
 		/*if((double) rand() / (RAND_MAX) > 0.5)
@@ -125,11 +125,20 @@ void runKohonen(){
 		//inVector[j] = (double) rand() / (RAND_MAX);
 
 		Mat src = getImage(i);
+
+
+
 		cout << i << endl;
 
 		Mat filtered;
 		vector<Mat> singleObjects;
+
+		cout << "tesT" << endl;
+
 		singleObjects = filterSurrounding(src, filtered);
+
+		cout << "SingleObjects Size: " << singleObjects.size() << endl;
+
 		vector<KeyPoint> keypoints;
 
 		Mat output;
@@ -140,8 +149,8 @@ void runKohonen(){
 
 		SiftDescriptorExtractor extractor;
 
-		for(int i=0; i<singleObjects.size(); i++){
-			getOverlay(src, singleObjects[i]);
+		for(int j=0; j<singleObjects.size(); j++){
+			getOverlay(src, singleObjects[j]);
 			//keypoints = getKeypointsFromObject(singleObjects[i]);
 			//descriptor = getDescriptorsFromObject(singleObjects[i],keypoints, extractor);
 			//descriptorVec.push_back(descriptor.clone());
@@ -149,8 +158,17 @@ void runKohonen(){
 			//	drawKeypoints(singleObjects[i], keypoints, singleObjects[i]);
 			//	imshow(NumberToString(i), singleObjects[i]);
 			//}
-			cout << "Custom desc" << endl;
-			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[i]);
+
+			cout << "Custom desc : " << endl;
+			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
+
+			for( int k = 0; k < customDesc.size(); k++){
+				cout << customDesc[k] << endl;
+			}
+
+			imshow("temp", singleObjects[j]);
+			waitKey();
+
 			cout << "kohonen" << endl;
 			KNN.adjustWeights(customDesc);
 		}

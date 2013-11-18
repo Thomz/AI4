@@ -134,9 +134,10 @@ void KohonenNetwork::showAsImage(string windowName){
 			image.at<cv::Vec3b>(j,i)[0] = knnMap[i][j].weights[0] * 255.0;
 			image.at<cv::Vec3b>(j,i)[1] = knnMap[i][j].weights[1] * 255.0;
 			image.at<cv::Vec3b>(j,i)[2] = knnMap[i][j].weights[2] * 255.0;
-			if(showBMUimage){
-				if(BMUcount[i][j] > totalIterations/20)
-					circle(bmuIMG, Point(i,j), 2, Scalar(image.at<cv::Vec3b>(j,i)[0],image.at<cv::Vec3b>(j,i)[1] ,image.at<cv::Vec3b>(j,i)[2]),2);
+			if(showBMUimage && iterationCounter>1){
+				if(BMUcount[i][j] > 0)
+					circle(bmuIMG, Point(i,j), 2, Scalar(255,255,255),2);
+					//circle(bmuIMG, Point(i,j), 2, Scalar(image.at<cv::Vec3b>(j,i)[0],image.at<cv::Vec3b>(j,i)[1] ,image.at<cv::Vec3b>(j,i)[2]),2);
 			}
 		}
 	}
