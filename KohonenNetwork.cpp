@@ -199,10 +199,25 @@ void KohonenNetwork::saveMap(){
 		for(int j=0; j<mapSize; j++){
 			for(int k=0; k<weightSize; k++){
 				myfile << knnMap[i][j].weights[k];
-				myfile << ",";
+				myfile << " ";
 			}
 			myfile << endl;
 		}
+	}
+	myfile.close();
+}
+
+void KohonenNetwork::saveBMUs(){
+	ofstream myfile;
+	myfile.open ("bmus.txt");
+	myfile << mapSize << endl;
+
+	for(int i=0; i<mapSize; i++){
+		for(int j=0; j<mapSize; j++){
+				myfile << BMUcount[i][j];
+				myfile << " ";
+		}
+		myfile << endl;
 	}
 	myfile.close();
 }

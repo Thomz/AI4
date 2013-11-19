@@ -14,7 +14,7 @@
 #include <fstream>
 
 
-#define totalIterations 32
+#define totalIterations 103
 #define startLearningRate 0.1
 #define showBMUimage true
 
@@ -52,6 +52,7 @@ public:
 	void getBMUs();
 	void classifyBMU(vector<double> inputWieght, string objectName);
 	void saveMap();
+	void saveBMUs();
 
 
 
