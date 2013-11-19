@@ -13,12 +13,13 @@
 #include "opencv2/opencv.hpp"
 #include <fstream>
 
-#define totalIterations 100
+#define totalIterations 5
 #define startLearningRate 0.1
 #define showBMUimage true
 #define classificationPics 12
 #define maxThreshold 0.6
 #define minThreshold 0.1
+#define startPicKoh 30
 
 
 using namespace std;

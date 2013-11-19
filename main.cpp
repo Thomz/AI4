@@ -79,9 +79,9 @@ void readEvaluationSet(){
 
 		Mat src = getImageEvaluation(i);
 
-		vector<vector<Point> > contours;
+		Mat filtered;
 		vector<Mat> singleObjects;
-		singleObjects = filterSurrounding(src, contours);
+		singleObjects = filterSurrounding(src, filtered);
 		vector<KeyPoint> keypoints;
 
 		Mat output;
@@ -114,7 +114,7 @@ void runKohonen(){
 	//vector<double> inVector(tempD, tempD+(GRIDHEIGHT*GRIDWIDTH*3));
 
 	cout << "Making kohonen network" << endl;
-	for(int i = 70; i < totalIterations; i++){
+	for(int i = startPicKoh; i < startPicKoh+ totalIterations; i++){
 		/*if((double) rand() / (RAND_MAX) > 0.5)
 			inVector[j] = 1;
 		else
@@ -127,22 +127,28 @@ void runKohonen(){
 
 		cout << i << endl;
 
+		Mat filtered;
 		vector<Mat> singleObjects;
 
-		vector<vector<Point> > contours;
 
-		singleObjects = filterSurrounding(src, contours);
 
-		cout << "Contour size: " <<  contours.size() << endl;
+		singleObjects = filterSurrounding(src, filtered);
+
+		vector<KeyPoint> keypoints;
+
+		Mat output;
+		Mat descriptor;
+		vector<Mat > descriptorVec;
 
 		cout << "New iteration" << endl;
 
-		for(int j=1; j<singleObjects.size(); j++){
+		SiftDescriptorExtractor extractor;
+
+		for(int j=0; j<singleObjects.size(); j++){
 			getOverlay(src, singleObjects[j]);
 
-
 			cout << "Custom desc : " << endl;
-			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j], contours, j);
+			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
 
 			for( int k = 0; k < customDesc.size(); k++){
 				cout << customDesc[k] << endl;
@@ -161,7 +167,6 @@ void runKohonen(){
 }
 
 void classifyKohonen(){
-	vector<vector<Point> > contours;
 
 	for(int i = 0; i < classificationPics; i++){
 		Mat src = getImageClassification(0,KNN.classObjects[i]);
@@ -170,12 +175,12 @@ void classifyKohonen(){
 
 		vector<Mat> singleObjects;
 
-		singleObjects = filterSurrounding(src, contours);
+		singleObjects = filterSurrounding(src, filtered);
 
 		for(int j=0; j<1; j++){
 				getOverlay(src, singleObjects[j]);
 
-				vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j],contours,j);
+				vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
 
 				imshow("Picture", singleObjects[j]);
 				string objectName;
@@ -193,18 +198,19 @@ void testMethod(){
 
 	imshow("hej", tempMat);
 	waitKey();
-	vector<vector<Point> > contours;
+
+	Mat filtered;
 
 	vector<Mat> singleObjects;
 
-	singleObjects = filterSurrounding(tempMat, contours);
+	singleObjects = filterSurrounding(tempMat, filtered);
 
 	getOverlay(tempMat, singleObjects[0]);
 
 	imshow("hej", singleObjects[0]);
 	waitKey();
 
-	vector<double> tempV = getCustomObjectDescriptor(singleObjects[0],contours,0);
+	vector<double> tempV = getCustomObjectDescriptor(singleObjects[0]);
 
 	for(int i = 0; i < tempV.size(); i++)
 		cout << tempV[i] << endl;
@@ -241,13 +247,12 @@ int main(int argc, char **argv) {
 	int pic = startPic;
 	int i = 0;
 	while(true){
-		vector<vector<Point> > contours;
 
 		string inputObject = "cola";
 		Mat src = getImage(i);
 		Mat filtered;
 		vector<Mat> singleObjects;
-		singleObjects = filterSurrounding(src, contours);
+		singleObjects = filterSurrounding(src, filtered);
 		vector<KeyPoint> keypoints;
 
 		Mat output;
