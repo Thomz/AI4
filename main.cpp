@@ -8,7 +8,7 @@
 vector<vector<Mat> > evaluateDescriptors;
 vector<vector<Mat> > evaluateObjects;
 
-KohonenNetwork KNN(200,GRIDHEIGHT*GRIDWIDTH*3);
+KohonenNetwork KNN(50,GRIDHEIGHT*GRIDWIDTH*3);
 
 struct color{
 	vector<double> rgb;
@@ -108,6 +108,7 @@ void runKohonen(){
 	//KNN.printNetwork();
 
 	//KNN.showAsImage("Before");
+	//waitKey();
 
 	//double tempD[] = {0.3, 0.4, 0.12, 0.2, 0.6};
 	//vector<double> inVector(tempD, tempD+(GRIDHEIGHT*GRIDWIDTH*3));
@@ -161,8 +162,6 @@ void runKohonen(){
 		cout << "end" << endl;
 	}
 	cout << " done" << endl;
-
-	KNN.showAsImage("After");
 }
 
 void classifyKohonen(){
@@ -190,14 +189,35 @@ void classifyKohonen(){
 				KNN.classifyBMU(customDesc,KNN.classObjects[i]);
 		}
 	}
-
-	KNN.printBMUcount();
-
 }
 
+void testMethod(){
+	Mat tempMat = imread("test.jpg", CV_LOAD_IMAGE_UNCHANGED );
 
+	imshow("hej", tempMat);
+	waitKey();
+
+	Mat filtered;
+
+	vector<Mat> singleObjects;
+
+	singleObjects = filterSurrounding(tempMat, filtered);
+
+	getOverlay(tempMat, singleObjects[0]);
+
+	imshow("hej", singleObjects[0]);
+	waitKey();
+
+	vector<double> tempV = getCustomObjectDescriptor(singleObjects[0]);
+
+	for(int i = 0; i < tempV.size(); i++)
+		cout << tempV[i] << endl;
+}
 
 int main(int argc, char **argv) {
+	//testMethod();
+
+	//return 0;
 
 	//KNN.load();
 
@@ -208,6 +228,8 @@ int main(int argc, char **argv) {
 	KNN.showAsImage("KNN");
 
 	classifyKohonen();
+
+	KNN.printBMUcount();
 
 	waitKey();
 

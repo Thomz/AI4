@@ -17,6 +17,8 @@
 #define startLearningRate 0.1
 #define showBMUimage true
 #define classificationPics 12
+#define maxThreshold 0.6
+#define minThreshold 0.1
 
 
 using namespace std;

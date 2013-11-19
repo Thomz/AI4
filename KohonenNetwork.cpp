@@ -30,10 +30,12 @@ KohonenNetwork::KohonenNetwork(int sizeMap, int sizeWeights) {
 
     srand (time(NULL));
 
+    double diff = maxThreshold - minThreshold;
+
 	for(int i = 0; i < knnMap.size(); i++){
 		for(int j = 0; j < knnMap.size(); j++){
 			for(int k = 0; k < sizeWeights; k++){
-				knnMap[i][j].weights.push_back(((double) rand() / (RAND_MAX)));
+				knnMap[i][j].weights.push_back( (((double) rand() / RAND_MAX) * diff) + minThreshold);
 				knnMap[i][j].point = Point(i,j);
 				knnMap[i][j].object = "";
 				BMUcount[i][j] = 0;
@@ -60,7 +62,7 @@ void KohonenNetwork::printNetwork(){
 void KohonenNetwork::printBMUcount(){
 	for(int i = 0; i < BMUcount.size(); i++){
 		for(int j = 0; j < BMUcount.size(); j++){
-			cout << "[" << knnMap[i][j].object << "]";
+			cout << "[" << knnMap[j][i].object << "]";
 		}
 		cout << endl;
 	}
