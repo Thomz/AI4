@@ -11,10 +11,12 @@
 #include <math.h>
 #include <iomanip>
 #include "opencv2/opencv.hpp"
+#include<fstream>
 
-#define totalIterations 32
+#define totalIterations 40
 #define startLearningRate 0.1
 #define showBMUimage true
+#define classificationPics 12
 
 
 using namespace std;
@@ -35,6 +37,8 @@ public:
 		Point point;
 	};
 
+	string classObjects[12];
+
 	vector<vector<node> > knnMap;
 	vector<vector<double> > BMUcount;
 	vector<node> BMUs;
@@ -49,9 +53,9 @@ public:
 	void showAsImage(string windowName);
 	void getBMUs();
 	void classifyBMU(vector<double> inputWieght, string objectName);
-
-
-
+	void loadMap();
+	void loadBmuMap();
+	void load();
 
 
 

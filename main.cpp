@@ -143,13 +143,6 @@ void runKohonen(){
 
 		for(int j=0; j<singleObjects.size(); j++){
 			getOverlay(src, singleObjects[j]);
-			//keypoints = getKeypointsFromObject(singleObjects[i]);
-			//descriptor = getDescriptorsFromObject(singleObjects[i],keypoints, extractor);
-			//descriptorVec.push_back(descriptor.clone());
-			//if(showSingleObjectsWithKeypoints){
-			//	drawKeypoints(singleObjects[i], keypoints, singleObjects[i]);
-			//	imshow(NumberToString(i), singleObjects[i]);
-			//}
 
 			cout << "Custom desc : " << endl;
 			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
@@ -167,7 +160,6 @@ void runKohonen(){
 
 		cout << "end" << endl;
 	}
-
 	cout << " done" << endl;
 
 	KNN.showAsImage("After");
@@ -175,35 +167,45 @@ void runKohonen(){
 
 void classifyKohonen(){
 
-	Mat src = getImageEvaluation(1);
+	for(int i = 0; i < classificationPics; i++){
+		Mat src = getImageClassification(0,KNN.classObjects[i]);
 
-	Mat filtered;
+		Mat filtered;
 
-	vector<Mat> singleObjects;
+		vector<Mat> singleObjects;
 
-	singleObjects = filterSurrounding(src, filtered);
+		singleObjects = filterSurrounding(src, filtered);
 
-	for(int j=0; j<1; j++){
-			getOverlay(src, singleObjects[j]);
+		for(int j=0; j<1; j++){
+				getOverlay(src, singleObjects[j]);
 
-			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
+				vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
 
-			imshow("Picture", singleObjects[j]);
-			string objectName;
-			//cin >> objectName;
+				imshow("Picture", singleObjects[j]);
+				string objectName;
+				//cin >> objectName;
 
-			//waitKey();
+				//waitKey();
 
-			KNN.classifyBMU(customDesc,evaluationObject);
+				KNN.classifyBMU(customDesc,KNN.classObjects[i]);
 		}
+	}
+
+	KNN.printBMUcount();
+
 }
+
 
 
 int main(int argc, char **argv) {
 
+	//KNN.load();
+
 	runKohonen();
 
 	KNN.getBMUs();
+
+	KNN.showAsImage("KNN");
 
 	classifyKohonen();
 

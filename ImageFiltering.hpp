@@ -108,13 +108,16 @@ Mat getImage(int i){
 		return imread("pics/training/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 }
 
-
 Mat getImageEvaluation(int i){
 	string temp = evaluationObject;
 	if(evaluation)
 		return imread("pics/evaluation/" + temp + "/" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 	else
 		return imread("pics/training/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+}
+
+Mat getImageClassification(int i, string object){
+	return imread("pics/classification/" + object +  ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 }
 
 Mat getDescriptorsFromObject(Mat src, vector<KeyPoint> keypoints,	SiftDescriptorExtractor extractor){

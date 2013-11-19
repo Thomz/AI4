@@ -14,6 +14,11 @@ KohonenNetwork::KohonenNetwork(int sizeMap, int sizeWeights) {
 	timeConstant = totalIterations/log(knnMapRadius);
 	iterationCounter = 0;
 
+	string classificationObjects[] = {"bicycletube", "cacao", "candle", "cillitbang", "cola", "controller", "curryketchup", "jaeger", "kleenex","lacoste","powerball","vestfyen"};
+
+	for(int i = 0; i < classificationPics; i++)
+		classObjects[i] = classificationObjects[i];
+
     knnMap.resize(sizeMap);
     for (int i = 0; i < sizeMap; i++)
         knnMap[i].resize(sizeMap);
@@ -46,7 +51,7 @@ KohonenNetwork::~KohonenNetwork() {
 void KohonenNetwork::printNetwork(){
 	for(int i = 0; i < knnMap.size(); i++){
 		for(int j = 0; j < knnMap.size(); j++){
-			cout << "[" <<  knnMap[i][j].weights.size() << "]";
+			cout << "[" <<  knnMap[i][j].weights[0] << "]";
 		}
 		cout << endl;
 	}
@@ -190,5 +195,74 @@ void KohonenNetwork::getBMUs(){
 
 }
 
+void KohonenNetwork::loadMap(){
+	ifstream myReadFile;
+	myReadFile.open("knn.txt");
+
+	string temp;
+	double tempD;
+
+	myReadFile >> temp;
+	mapSize = atoi(temp.c_str());
+
+	myReadFile >> temp;
+	weightSize = atoi(temp.c_str());
+
+	 knnMap.resize(mapSize);
+	 for (int i = 0; i < mapSize; i++)
+		 knnMap[i].resize(mapSize);
+
+	for(int i = 0; i < mapSize; i++){
+		for(int j = 0; j <mapSize; j++){
+			cout << i << " - " << j << endl;
+			knnMap[i][j].weights.resize(weightSize);
+			for(int k = 0; k < weightSize; k++){
+				myReadFile >> temp;
+				knnMap[i][j].weights[k] = atof(temp.c_str());
+				knnMap[i][j].point = Point(i,j);
+				knnMap[i][j].object = "";
+			}
+		}
+	}
+
+	iterationCounter = 2;
+
+	myReadFile.close();
+
+	printNetwork();
+
+}
+
+void KohonenNetwork::load(){
+	loadMap();
+	loadBmuMap();
+}
+
+void KohonenNetwork::loadBmuMap(){
+	ifstream myReadFile;
+	myReadFile.open("bmus.txt");
+
+	string temp;
+	int bmuMapSize;
+
+	myReadFile >> temp;
+	bmuMapSize = atoi(temp.c_str());
+
+	 BMUcount.resize(bmuMapSize);
+	 for (int i = 0; i < bmuMapSize; i++)
+		 BMUcount[i].resize(bmuMapSize);
+
+	for(int i = 0; i < bmuMapSize; i++){
+		for(int j = 0; j <bmuMapSize; j++){
+			myReadFile >> temp;
+			BMUcount[i][j] =atoi(temp.c_str());
+		}
+	}
+
+	myReadFile.close();
+
+	printNetwork();
+
+}
 
 
