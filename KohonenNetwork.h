@@ -13,7 +13,7 @@
 #include "opencv2/opencv.hpp"
 #include <fstream>
 
-#define totalIterations 40
+#define totalIterations 100
 #define startLearningRate 0.1
 #define showBMUimage true
 #define classificationPics 12
