@@ -123,14 +123,12 @@ void runKohonen(){
 
 		//inVector[j] = (double) rand() / (RAND_MAX);
 
-		Mat src = getImageKohonen(i,1);
+		Mat src = getImageKohonen(i,1, "");
 
 		cout << i << endl;
 
 		Mat filtered;
 		vector<Mat> singleObjects;
-
-
 
 		singleObjects = filterSurrounding(src, filtered);
 
@@ -235,7 +233,7 @@ void scramblePics(){
 }
 
 void evaluateKohonen(){
-	Mat object = getImageKohonen(1,0);
+	Mat object = getImageKohonen(1,0, "jagermeister");
 
 	Mat filtered;
 	vector<Mat> singleObjects;
@@ -251,10 +249,14 @@ void evaluateKohonen(){
 		descriptors.push_back(descriptor);
 	}
 
-	string objectStr = "controller";
-	int guess = KNN.getObject(descriptors, objectStr);
+	for(int i = 0; i < classificationPics; i++){
+		string objectStr = KNN.classObjects[i];
+		int guess = KNN.getObject(descriptors, objectStr);
+		if(guess != -1)
+			imshow(objectStr, singleObjects[guess]);
+	}
 
-	imshow("Guess", singleObjects[guess]);
+
 	waitKey();
 }
 
@@ -267,18 +269,23 @@ int main() {
 	//return 0;
 	KNN.load();
 
+	cout << KNN.BMUs.size() << endl;
+
+	//KNN.printBMUcount();
+
 	//runKohonen();
 
 	//KNN.saveBMUs();
 	//KNN.saveMap();
 	//cout << "saved" << endl;
 
-	KNN.getBMUs();
+	//KNN.getBMUs();
 
 	KNN.showAsImage("KNN");
 
-	cout << "classifying" << endl;
-	classifyKohonen();
+	//classifyKohonen();
+
+	//KNN.saveClassifiers();
 
 	evaluateKohonen();
 

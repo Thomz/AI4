@@ -109,8 +109,8 @@ Mat getImage(int i){
 }
 
 // i is set to: 0=evaluation and 1=training
-Mat getImageKohonen(int i, int task){
-	string temp = evaluationObject;
+Mat getImageKohonen(int i, int task, string object){
+	string temp = object;
 	if(task==0){
 		Mat img = imread("pics/evaluation/" + temp + "/" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 		cvtColor(img, img, CV_BGR2HSV);

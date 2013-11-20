@@ -62,6 +62,10 @@ public:
 	void saveMap();
 	void saveBMUs();
 	int getObject(vector<vector<double> >descriptor, string object);
+	void saveClassifiers();
+	void loadClassifiers();
+
+
 
 
 

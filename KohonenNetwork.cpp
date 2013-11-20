@@ -187,7 +187,7 @@ void KohonenNetwork::classifyBMU(vector<double> inputWieght, string objectName){
 
 	Mat bmuIMG = Mat::ones(Size(mapSize,mapSize), CV_8UC3);
 	circle(bmuIMG, Point(BMUs[bestBMU].point.x,BMUs[bestBMU].point.y), 2, Scalar(255,255,255),2);
-	imshow("Candle", bmuIMG);
+	//imshow("Candle", bmuIMG);
 
 }
 
@@ -202,6 +202,9 @@ void KohonenNetwork::getBMUs(){
 }
 
 int KohonenNetwork::getObject(vector<vector<double> >descriptors, string object){
+
+	cout << "Finding object : " << object << endl;
+
 	int bmuNumb = -1;
 
 	for(int i = 0; i < BMUs.size(); i++){
@@ -209,7 +212,10 @@ int KohonenNetwork::getObject(vector<vector<double> >descriptors, string object)
 			bmuNumb = i;
 	}
 
-	double bestDistance(INFINITY), distance(0);
+	if(bmuNumb == -1)
+		return -1;
+
+	double bestDistance(99999), distance(0);
 	int bestDesc = 0;
 
 	for(int i = 0; i < descriptors.size(); i++){
@@ -218,13 +224,16 @@ int KohonenNetwork::getObject(vector<vector<double> >descriptors, string object)
 
 		distance = sqrt(distance);
 
-		if(distance < bestDistance && knnMap[BMUs[i].point.x][BMUs[i].point.y].object.size() != 0){
+		cout <<  knnMap[BMUs[i].point.x][BMUs[i].point.y].object.size() << endl;
+
+		if(distance < bestDistance){
 			bestDistance = distance;
 			bestDesc = i;
 		}
 
 		distance = 0;
 	}
+	cout << "best distance: " << bestDistance << endl;
 
 	return bestDesc;
 }
@@ -270,6 +279,7 @@ void KohonenNetwork::loadMap(){
 void KohonenNetwork::load(){
 	loadMap();
 	loadBmuMap();
+	loadClassifiers();
 }
 
 void KohonenNetwork::loadBmuMap(){
@@ -330,4 +340,34 @@ void KohonenNetwork::saveBMUs(){
 	myfile.close();
 }
 
+void KohonenNetwork::loadClassifiers(){
+	ifstream myReadFile;
+	int i, j;
+	BMUs.clear();
+	string object;
+	myReadFile.open("classifiers.txt");
+	while(!myReadFile.eof()){
+		myReadFile >> i;
+		myReadFile >> j;
+		myReadFile >> object;
+		knnMap[j][i].object = object;
+		BMUs.push_back(knnMap[j][i]);
+
+	}
+}
+
+void KohonenNetwork::saveClassifiers(){
+	ofstream myfile;
+	myfile.open ("classifiers.txt");
+
+	for(int i=0; i<mapSize; i++){
+		for(int j=0; j<mapSize; j++){
+			if(!knnMap[i][j].object.empty())
+				myfile << i << " " << j << " " << knnMap[i][j].object << endl;
+		}
+	}
+	myfile.close();
+
+
+}
 
