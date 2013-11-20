@@ -201,26 +201,32 @@ void KohonenNetwork::getBMUs(){
 
 }
 
-void KohonenNetwork::getObject(vector<double> descriptor){
-
-	double bestDistance(INFINITY), distance(0);
-	int bestBMU = 0;
+int KohonenNetwork::getObject(vector<vector<double> >descriptors, string object){
+	int bmuNumb = -1;
 
 	for(int i = 0; i < BMUs.size(); i++){
+		if( knnMap[BMUs[i].point.x][BMUs[i].point.y].object == object)
+			bmuNumb = i;
+	}
+
+	double bestDistance(INFINITY), distance(0);
+	int bestDesc = 0;
+
+	for(int i = 0; i < descriptors.size(); i++){
 		for(int j = 0; j < weightSize; j++)
-			distance += pow(BMUs[i].weights[j] - descriptor[j],2);
+			distance += pow(BMUs[bmuNumb].weights[j] - descriptors[i][j],2);
 
 		distance = sqrt(distance);
 
-		if(distance < bestDistance){
+		if(distance < bestDistance && knnMap[BMUs[i].point.x][BMUs[i].point.y].object.size() != 0){
 			bestDistance = distance;
-			bestBMU = i;
+			bestDesc = i;
 		}
 
 		distance = 0;
 	}
 
-	cout << knnMap[BMUs[bestBMU].point.x][BMUs[bestBMU].point.y].object << endl;
+	return bestDesc;
 }
 
 void KohonenNetwork::loadMap(){

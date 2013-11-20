@@ -235,20 +235,27 @@ void scramblePics(){
 }
 
 void evaluateKohonen(){
-	Mat object = getImageEvaluation(1);
+	Mat object = getImageKohonen(1,0);
 
 	Mat filtered;
 	vector<Mat> singleObjects;
 	singleObjects = filterSurrounding(object, filtered);
 
-	getOverlay(object, singleObjects[0]);
+	vector<vector<double> > descriptors;
 
-	imshow("Pic", singleObjects[0]);
+	for(int i = 0; i < singleObjects.size(); i++){
+		getOverlay(object, singleObjects[i]);
+
+		vector<double> descriptor = getCustomObjectDescriptor(singleObjects[i]);
+
+		descriptors.push_back(descriptor);
+	}
+
+	string objectStr = "controller";
+	int guess = KNN.getObject(descriptors, objectStr);
+
+	imshow("Guess", singleObjects[guess]);
 	waitKey();
-
-	vector<double> descriptor = getCustomObjectDescriptor(singleObjects[0]);
-
-	KNN.getObject(descriptor);
 }
 
 int main() {

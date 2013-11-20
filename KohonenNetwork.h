@@ -61,7 +61,7 @@ public:
 	void load();
 	void saveMap();
 	void saveBMUs();
-	void getObject(vector<double> descriptor);
+	int getObject(vector<vector<double> >descriptor, string object);
 
 
 
