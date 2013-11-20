@@ -108,6 +108,53 @@ Mat getImage(int i){
 		return imread("pics/training/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
 }
 
+// i is set to: 0=evaluation and 1=training
+Mat getImageKohonen(int i, int task){
+	string temp = evaluationObject;
+	if(task==0){
+		Mat img = imread("pics/evaluation/" + temp + "/" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+		cvtColor(img, img, CV_BGR2HSV);
+		// make brighter
+		for(int y=0; y<img.rows; y++ ){
+			for(int x=0; x<img.cols; x++){
+				if(img.at<Vec3b>(y,x)[2]>5){
+					int tempVal = img.at<Vec3b>(y,x)[2];
+					tempVal+=100;
+					if(tempVal>255){
+						img.at<Vec3b>(y,x)[2]=255;
+					}
+					else{
+						img.at<Vec3b>(y,x)[2]=tempVal;
+					}
+				}
+			}
+		}
+		cvtColor(img, img, CV_HSV2BGR);
+		return img;
+	}
+	else{
+		Mat img = imread("pics/training/0" + NumberToString(i) + ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+		cvtColor(img, img, CV_BGR2HSV);
+		// make brighter
+		for(int y=0; y<img.rows; y++ ){
+			for(int x=0; x<img.cols; x++){
+				if(img.at<Vec3b>(y,x)[2]>5){
+					int tempVal = img.at<Vec3b>(y,x)[2];
+					tempVal+=100;
+					if(tempVal>255){
+						img.at<Vec3b>(y,x)[2]=255;
+					}
+					else{
+						img.at<Vec3b>(y,x)[2]=tempVal;
+					}
+				}
+			}
+		}
+		cvtColor(img, img, CV_HSV2BGR);
+		return img;
+	}
+}
+
 Mat getImageEvaluation(int i){
 	string temp = evaluationObject;
 	if(evaluation)
@@ -117,7 +164,25 @@ Mat getImageEvaluation(int i){
 }
 
 Mat getImageClassification(int i, string object){
-	return imread("pics/classification/" + object +  ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+	Mat img = imread("pics/classification/" + object +  ".jpg", CV_LOAD_IMAGE_UNCHANGED);
+	cvtColor(img, img, CV_BGR2HSV);
+	// make brighter
+	for(int y=0; y<img.rows; y++ ){
+		for(int x=0; x<img.cols; x++){
+			if(img.at<Vec3b>(y,x)[2]>5){
+				int tempVal = img.at<Vec3b>(y,x)[2];
+				tempVal+=100;
+				if(tempVal>255){
+					img.at<Vec3b>(y,x)[2]=255;
+				}
+				else{
+					img.at<Vec3b>(y,x)[2]=tempVal;
+				}
+			}
+		}
+	}
+	cvtColor(img, img, CV_HSV2BGR);
+	return img;
 }
 
 Mat getDescriptorsFromObject(Mat src, vector<KeyPoint> keypoints,	SiftDescriptorExtractor extractor){
@@ -234,14 +299,30 @@ vector<double> getCustomObjectDescriptor(Mat input){
 	Mat ROI = rotatedInput(rect);
 	Mat hsv;
 	cvtColor(ROI, hsv, CV_BGR2HSV);
-	Mat bgr = ROI.clone();
+	// make brighter
+	/*for(int y=0; y<hsv.rows; y++ ){
+		for(int x=0; x<hsv.cols; x++){
+			if(hsv.at<Vec3b>(y,x)[2]>5){
+				int tempVal = hsv.at<Vec3b>(y,x)[2];
+				tempVal+=100;
+				if(tempVal>255){
+					hsv.at<Vec3b>(y,x)[2]=255;
+				}
+				else{
+					hsv.at<Vec3b>(y,x)[2]=tempVal;
+				}
+			}
+		}
+	}*/
+	Mat bgr;
+	cvtColor(hsv, bgr, CV_HSV2BGR);
 
 	for(int k=0; k<GRIDWIDTH; k++){
 		for(int l=0; l<GRIDHEIGHT; l++){
 			double currentSumR=0;
 			double currentSumG=0;
 			double currentSumB=0;
-			int pixels= bgr.rows/GRIDHEIGHT * (bgr.cols/GRIDWIDTH);
+			int pixels= hsv.rows/GRIDHEIGHT * (hsv.cols/GRIDWIDTH);
 
 			for(int y=0+(l*(bgr.rows/GRIDHEIGHT)); y<bgr.rows/GRIDHEIGHT+(l*(bgr.rows/GRIDHEIGHT)); y++ ){
 				for(int x=0+(k*(bgr.cols/GRIDWIDTH)); x<bgr.cols/GRIDWIDTH+(k*(bgr.cols/GRIDWIDTH)); x++){
@@ -260,6 +341,7 @@ vector<double> getCustomObjectDescriptor(Mat input){
 			avgs.push_back((currentSumR/pixels)/255);
 		}
 	}
+
 
 	return avgs;
 }

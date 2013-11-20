@@ -125,6 +125,8 @@ void KohonenNetwork::adjustWeights(vector<double> inputVector){
 					knnMap[i][j].weights[k] = knnMap[i][j].weights[k] + influence * learningRate * (inputVector[k] - knnMap[i][j].weights[k]);
 					if(knnMap[i][j].weights[k] < 0.0001 )
 						knnMap[i][j].weights[k] = 0;
+					if(knnMap[i][j].weights[k] > 1.)
+						knnMap[i][j].weights[k] = 1;
 				}
 			}
 		}
