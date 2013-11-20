@@ -113,6 +113,7 @@ void runKohonen(){
 	//vector<double> inVector(tempD, tempD+(GRIDHEIGHT*GRIDWIDTH*3));
 
 	cout << "Making kohonen network" << endl;
+
 	for(int i = startPicKoh; i < startPicKoh+ totalIterations; i++){
 		/*if((double) rand() / (RAND_MAX) > 0.5)
 			inVector[j] = 1;
@@ -122,7 +123,7 @@ void runKohonen(){
 
 		//inVector[j] = (double) rand() / (RAND_MAX);
 
-		Mat src = getImage(i);
+		Mat src = getImageKohonen(i,1);
 
 		cout << i << endl;
 
@@ -139,24 +140,24 @@ void runKohonen(){
 		Mat descriptor;
 		vector<Mat > descriptorVec;
 
-		cout << "New iteration" << endl;
+		//cout << "New iteration" << endl;
 
 		SiftDescriptorExtractor extractor;
 
 		for(int j=0; j<singleObjects.size(); j++){
 			getOverlay(src, singleObjects[j]);
 
-			cout << "Custom desc : " << endl;
+			//cout << "Custom desc : " << endl;
 			vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
 
-			for( int k = 0; k < customDesc.size(); k++){
+			/*for( int k = 0; k < customDesc.size(); k++){
 				cout << customDesc[k] << endl;
-			}
+			}*/
 
 			//imshow("temp", singleObjects[j]);
 			//waitKey();
 
-			cout << "kohonen" << endl;
+			//cout << "kohonen" << endl;
 			KNN.adjustWeights(customDesc);
 		}
 
@@ -257,20 +258,26 @@ int main() {
 	//testMethod();
 
 	//return 0;
-
 	KNN.load();
 
 	//runKohonen();
+
+	//KNN.saveBMUs();
+	//KNN.saveMap();
+	//cout << "saved" << endl;
 
 	KNN.getBMUs();
 
 	KNN.showAsImage("KNN");
 
+	cout << "classifying" << endl;
 	classifyKohonen();
 
 	evaluateKohonen();
 
 	//KNN.printBMUcount();
+
+
 
 	waitKey();
 
