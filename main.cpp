@@ -233,11 +233,11 @@ void scramblePics(){
 void evaluateKohonen(){
 
 		// Coca-cola
-	int correctObjects[] = {1,2,3,1,2,3,1,1,4};
+	//int correctObjects[] = {1,2,3,1,2,3,1,1,4};
 		//agermeister
 	//int correctObjects[] = {2,2,2,1,1,3,1,1,0,3};
 		// Candle
-	//int correctObjects[] = {3,0,1,2,0,0,1,1,2,1};
+	int correctObjects[] = {3,0,1,2,0,0,1,1,2,1};
 
 	double rightCnt = 0;
 
@@ -258,13 +258,14 @@ void evaluateKohonen(){
 			descriptors.push_back(descriptor);
 		}
 
-		int guess = KNN.getObject(descriptors, "coca-cola");
+		int guess = KNN.getObject(descriptors, "candle");
 
 		if(guess == correctObjects[j])
 			rightCnt++;
-
+/*
 		imshow("Guess", singleObjects[guess]);
 		waitKey();
+		*/
 	}
 
 	cout << "Rights pct: " << rightCnt/10.0 << endl;

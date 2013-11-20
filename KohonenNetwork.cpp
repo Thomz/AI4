@@ -302,8 +302,6 @@ void KohonenNetwork::loadBmuMap(){
 
 	myReadFile.close();
 
-	printNetwork();
-
 }
 void KohonenNetwork::saveMap(){
 	ofstream myfile;
