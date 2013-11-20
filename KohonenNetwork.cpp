@@ -14,7 +14,7 @@ KohonenNetwork::KohonenNetwork(int sizeMap, int sizeWeights) {
 	timeConstant = totalIterations/log(knnMapRadius);
 	iterationCounter = 0;
 
-	string classificationObjects[] = {"bicycletube", "cacao", "candle", "cillitbang", "cola", "controller", "curryketchup", "jaeger", "kleenex","lacoste","powerball","vestfyen"};
+	string classificationObjects[] = {"bicycletube", "cacao", "candle", "cillitbang", "coca-cola", "controller", "curryketchup", "jaeger", "kleenex","lacoste","powerball","vestfyen"};
 
 	for(int i = 0; i < classificationPics; i++)
 		classObjects[i] = classificationObjects[i];
@@ -224,7 +224,7 @@ int KohonenNetwork::getObject(vector<vector<double> >descriptors, string object)
 
 		distance = sqrt(distance);
 
-		cout <<  knnMap[BMUs[i].point.x][BMUs[i].point.y].object.size() << endl;
+		//cout <<  knnMap[BMUs[i].point.x][BMUs[i].point.y].object.size() << endl;
 
 		if(distance < bestDistance){
 			bestDistance = distance;
@@ -257,7 +257,7 @@ void KohonenNetwork::loadMap(){
 
 	for(int i = 0; i < mapSize; i++){
 		for(int j = 0; j <mapSize; j++){
-			cout << i << " - " << j << endl;
+			//cout << i << " - " << j << endl;
 			knnMap[i][j].weights.resize(weightSize);
 			for(int k = 0; k < weightSize; k++){
 				myReadFile >> temp;
@@ -271,9 +271,6 @@ void KohonenNetwork::loadMap(){
 	iterationCounter = 2;
 
 	myReadFile.close();
-
-	printNetwork();
-
 }
 
 void KohonenNetwork::load(){
@@ -350,8 +347,8 @@ void KohonenNetwork::loadClassifiers(){
 		myReadFile >> i;
 		myReadFile >> j;
 		myReadFile >> object;
-		knnMap[j][i].object = object;
-		BMUs.push_back(knnMap[j][i]);
+		knnMap[i][j].object = object;
+		BMUs.push_back(knnMap[i][j]);
 
 	}
 }
@@ -367,7 +364,5 @@ void KohonenNetwork::saveClassifiers(){
 		}
 	}
 	myfile.close();
-
-
 }
 

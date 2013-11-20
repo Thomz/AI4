@@ -228,36 +228,58 @@ void scramblePics(){
 		imwrite("pics/newTraining/0" + NumberToString(i) + ".jpg", pics[random_integer]);
 		pics.erase (pics.begin()+random_integer);
 	}
-
-
 }
 
 void evaluateKohonen(){
-	Mat object = getImageKohonen(1,0, "jagermeister");
 
-	Mat filtered;
-	vector<Mat> singleObjects;
-	singleObjects = filterSurrounding(object, filtered);
+		// Coca-cola
+	int correctObjects[] = {1,2,3,1,2,3,1,1,4};
+		//agermeister
+	//int correctObjects[] = {2,2,2,1,1,3,1,1,0,3};
+		// Candle
+	//int correctObjects[] = {3,0,1,2,0,0,1,1,2,1};
 
-	vector<vector<double> > descriptors;
+	double rightCnt = 0;
 
-	for(int i = 0; i < singleObjects.size(); i++){
-		getOverlay(object, singleObjects[i]);
+	for(int j = 1; j < 11; j++) {
+		Mat object = getImageKohonen(j,0, "coca-cola");
 
-		vector<double> descriptor = getCustomObjectDescriptor(singleObjects[i]);
+		Mat filtered;
+		vector<Mat> singleObjects;
+		singleObjects = filterSurrounding(object, filtered);
 
-		descriptors.push_back(descriptor);
+		vector<vector<double> > descriptors;
+
+		for(int i = 0; i < singleObjects.size(); i++){
+			getOverlay(object, singleObjects[i]);
+
+			vector<double> descriptor = getCustomObjectDescriptor(singleObjects[i]);
+
+			descriptors.push_back(descriptor);
+		}
+
+		int guess = KNN.getObject(descriptors, "coca-cola");
+
+		if(guess == correctObjects[j])
+			rightCnt++;
+
+		imshow("Guess", singleObjects[guess]);
+		waitKey();
 	}
 
+	cout << "Rights pct: " << rightCnt/10.0 << endl;
+
+
+
+/*
 	for(int i = 0; i < classificationPics; i++){
 		string objectStr = KNN.classObjects[i];
 		int guess = KNN.getObject(descriptors, objectStr);
 		if(guess != -1)
 			imshow(objectStr, singleObjects[guess]);
 	}
-
-
 	waitKey();
+	*/
 }
 
 int main() {
@@ -282,6 +304,7 @@ int main() {
 	//KNN.getBMUs();
 
 	KNN.showAsImage("KNN");
+	waitKey();
 
 	//classifyKohonen();
 
@@ -291,9 +314,6 @@ int main() {
 
 	//KNN.printBMUcount();
 
-
-
-	waitKey();
 
 	return 0;
 
