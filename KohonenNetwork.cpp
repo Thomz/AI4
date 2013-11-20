@@ -62,7 +62,7 @@ void KohonenNetwork::printNetwork(){
 void KohonenNetwork::printBMUcount(){
 	for(int i = 0; i < BMUcount.size(); i++){
 		for(int j = 0; j < BMUcount.size(); j++){
-			cout << "[" << knnMap[j][i].object << "]";
+			cout << "[" <<knnMap[i][j].object << "]";
 		}
 		cout << endl;
 	}
@@ -125,6 +125,8 @@ void KohonenNetwork::adjustWeights(vector<double> inputVector){
 					knnMap[i][j].weights[k] = knnMap[i][j].weights[k] + influence * learningRate * (inputVector[k] - knnMap[i][j].weights[k]);
 					if(knnMap[i][j].weights[k] < 0.0001 )
 						knnMap[i][j].weights[k] = 0;
+					if(knnMap[i][j].weights[k] > 1 )
+						knnMap[i][j].weights[k] = 1;
 				}
 			}
 		}
@@ -153,7 +155,7 @@ void KohonenNetwork::showAsImage(string windowName){
 
 	imshow("BMU Image",bmuIMG);
 
-
+	imwrite("temp.jpg", image);
 
 	imshow(windowName, image);
 }
@@ -195,6 +197,30 @@ void KohonenNetwork::getBMUs(){
 			if(BMUcount[i][j] > totalIterations/35)
 				BMUs.push_back(knnMap[i][j]);
 
+	cout << "Bmu size: " << BMUs.size() << endl;
+
+}
+
+void KohonenNetwork::getObject(vector<double> descriptor){
+
+	double bestDistance(INFINITY), distance(0);
+	int bestBMU = 0;
+
+	for(int i = 0; i < BMUs.size(); i++){
+		for(int j = 0; j < weightSize; j++)
+			distance += pow(BMUs[i].weights[j] - descriptor[j],2);
+
+		distance = sqrt(distance);
+
+		if(distance < bestDistance){
+			bestDistance = distance;
+			bestBMU = i;
+		}
+
+		distance = 0;
+	}
+
+	cout << knnMap[BMUs[bestBMU].point.x][BMUs[bestBMU].point.y].object << endl;
 }
 
 void KohonenNetwork::loadMap(){

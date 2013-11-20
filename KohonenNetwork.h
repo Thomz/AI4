@@ -13,8 +13,8 @@
 #include "opencv2/opencv.hpp"
 #include <fstream>
 
-#define totalIterations 5
-#define startLearningRate 0.1
+#define totalIterations 102
+#define startLearningRate 10
 #define showBMUimage true
 #define classificationPics 12
 #define maxThreshold 0.6
@@ -61,6 +61,8 @@ public:
 	void load();
 	void saveMap();
 	void saveBMUs();
+	void getObject(vector<double> descriptor);
+
 
 
 

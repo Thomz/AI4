@@ -2,13 +2,12 @@
 #include "ImageFiltering.hpp"
 #include "KohonenNetwork.h"
 
-
 #define showSingleObjectsWithKeypoints false
 
 vector<vector<Mat> > evaluateDescriptors;
 vector<vector<Mat> > evaluateObjects;
 
-KohonenNetwork KNN(50,GRIDHEIGHT*GRIDWIDTH*3);
+KohonenNetwork KNN(100,GRIDHEIGHT*GRIDWIDTH*3);
 
 struct color{
 	vector<double> rgb;
@@ -105,7 +104,7 @@ void readEvaluationSet(){
 }
 
 void runKohonen(){
-	//KNN.printNetwork();
+	KNN.printNetwork();
 
 	//KNN.showAsImage("Before");
 	//waitKey();
@@ -216,14 +215,52 @@ void testMethod(){
 		cout << tempV[i] << endl;
 }
 
-int main(int argc, char **argv) {
+void scramblePics(){
+	vector<Mat> pics;
+	for(int i = 0; i < 103; i++){
+		pics.push_back(getImage(i));
+	}
+
+	imshow("hek", pics[0]);
+	int i = 0;
+	while(!pics.empty()){
+		i++;
+		int random_integer = rand()%pics.size();
+		imwrite("pics/newTraining/0" + NumberToString(i) + ".jpg", pics[random_integer]);
+		pics.erase (pics.begin()+random_integer);
+	}
+
+
+}
+
+void evaluateKohonen(){
+	Mat object = getImageEvaluation(1);
+
+	Mat filtered;
+	vector<Mat> singleObjects;
+	singleObjects = filterSurrounding(object, filtered);
+
+	getOverlay(object, singleObjects[0]);
+
+	imshow("Pic", singleObjects[0]);
+	waitKey();
+
+	vector<double> descriptor = getCustomObjectDescriptor(singleObjects[0]);
+
+	KNN.getObject(descriptor);
+}
+
+int main() {
+
+	//scramblePics();
+
 	//testMethod();
 
 	//return 0;
 
-	//KNN.load();
+	KNN.load();
 
-	runKohonen();
+	//runKohonen();
 
 	KNN.getBMUs();
 
@@ -231,7 +268,9 @@ int main(int argc, char **argv) {
 
 	classifyKohonen();
 
-	KNN.printBMUcount();
+	evaluateKohonen();
+
+	//KNN.printBMUcount();
 
 	waitKey();
 
