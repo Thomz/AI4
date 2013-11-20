@@ -114,7 +114,8 @@ void runKohonen(){
 	//vector<double> inVector(tempD, tempD+(GRIDHEIGHT*GRIDWIDTH*3));
 
 	cout << "Making kohonen network" << endl;
-	for(int i = 1; i < totalIterations; i++){
+
+	for(int i = startPicKoh; i < startPicKoh+ totalIterations; i++){
 		/*if((double) rand() / (RAND_MAX) > 0.5)
 			inVector[j] = 1;
 		else
@@ -129,6 +130,8 @@ void runKohonen(){
 
 		Mat filtered;
 		vector<Mat> singleObjects;
+
+
 
 		singleObjects = filterSurrounding(src, filtered);
 

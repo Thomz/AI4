@@ -43,13 +43,22 @@ Thumbs.db
 # Pictures #
 ######################
 *.JPG
+*.jpg
 *.png
 *.bmp
+
+# Text files #
+######################
+*.txt*
+
+# Folders #
+######################
+database*
+pics
 
 # Build files #
 ######################
 CMakeLists.txt*
-
 CMakeCache.txt
 CMakeFiles
 *.cmake
