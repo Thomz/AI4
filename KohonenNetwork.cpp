@@ -14,10 +14,10 @@ KohonenNetwork::KohonenNetwork(int sizeMap, int sizeWeights) {
 	timeConstant = totalIterations/log(knnMapRadius);
 	iterationCounter = 0;
 
-	string classificationObjects[] = {"bicycletube", "cacao", "candle", "cillitbang", "coca-cola", "controller", "curryketchup", "jaeger", "kleenex","lacoste","powerball","vestfyen"};
+	string classificationObjects[] = {"blaalys", "yellowcontroller", "bicycletube", "cacao", "candle", "cillitbang", "coca-cola", "controller", "curryketchup", "jagermeister", "kleenex","lacoste","powerball","vestfyen"};
 
 	for(int i = 0; i < classificationPics; i++)
-		classObjects[i] = classificationObjects[i];
+				classObjects[i] = classificationObjects[i];
 
     knnMap.resize(sizeMap);
     for (int i = 0; i < sizeMap; i++)
@@ -46,6 +46,7 @@ KohonenNetwork::KohonenNetwork(int sizeMap, int sizeWeights) {
 	cout << "Kohonen network created" << endl;
 }
 
+
 KohonenNetwork::~KohonenNetwork() {
 	// TODO Auto-generated destructor stub
 }
@@ -60,6 +61,15 @@ void KohonenNetwork::printNetwork(){
 }
 
 void KohonenNetwork::printBMUcount(){
+	for(int i = 0; i < BMUcount.size(); i++){
+		for(int j = 0; j < BMUcount.size(); j++){
+			cout << "[" <<BMUcount[i][j] << "]";
+		}
+		cout << endl;
+	}
+}
+
+void KohonenNetwork::printBMUObjects(){
 	for(int i = 0; i < BMUcount.size(); i++){
 		for(int j = 0; j < BMUcount.size(); j++){
 			cout << "[" <<knnMap[i][j].object << "]";
@@ -142,12 +152,12 @@ void KohonenNetwork::showAsImage(string windowName){
 	for(int i = 0; i < knnMap.size(); i++){
 		for(int j = 0; j < knnMap.size(); j++){
 			//double colors[] = { knnMap[i][j].weights[0], knnMap[i][j].weights[1], knnMap[i][j].weights[2] };
-			image.at<cv::Vec3b>(j,i)[0] = knnMap[i][j].weights[0] * 255.0;
-			image.at<cv::Vec3b>(j,i)[1] = knnMap[i][j].weights[1] * 255.0;
-			image.at<cv::Vec3b>(j,i)[2] = knnMap[i][j].weights[2] * 255.0;
+			image.at<cv::Vec3b>(i,j)[0] = knnMap[i][j].weights[0] * 255.0;
+			image.at<cv::Vec3b>(i,j)[1] = knnMap[i][j].weights[1] * 255.0;
+			image.at<cv::Vec3b>(i,j)[2] = knnMap[i][j].weights[2] * 255.0;
 			if(showBMUimage && iterationCounter>1){
 				if(BMUcount[i][j] > 0)
-					circle(bmuIMG, Point(i,j), 2, Scalar(255,255,255),2);
+					circle(bmuIMG, Point(j,i), 2, Scalar(255,255,255),2);
 					//circle(bmuIMG, Point(i,j), 2, Scalar(image.at<cv::Vec3b>(j,i)[0],image.at<cv::Vec3b>(j,i)[1] ,image.at<cv::Vec3b>(j,i)[2]),2);
 			}
 		}
@@ -158,11 +168,45 @@ void KohonenNetwork::showAsImage(string windowName){
 	imwrite("temp.jpg", image);
 
 	imshow(windowName, image);
+
 }
+
+void KohonenNetwork::showAmplifiedImage(string windowName, int amplification, bool showObjects){
+	int newMapWidth = mapSize * amplification;
+	Mat image = Mat::ones(Size(newMapWidth,newMapWidth), CV_8UC3);
+
+	for(int i = 0; i < knnMap.size(); i++){
+		for(int j = 0; j < knnMap.size(); j++){
+
+			for(int k = i * amplification; k < (i+1)*amplification ; k++){
+				for(int m = j * amplification; m < (j+1)*amplification ; m++){
+					image.at<cv::Vec3b>(k,m)[0] = knnMap[i][j].weights[0] * 255.0;
+					image.at<cv::Vec3b>(k,m)[1] = knnMap[i][j].weights[1] * 255.0;
+					image.at<cv::Vec3b>(k,m)[2] = knnMap[i][j].weights[2] * 255.0;
+				}
+			}
+		}
+	}
+
+	for(int i = 0; i < knnMap.size(); i++){
+		for(int j = 0; j < knnMap.size(); j++){
+			if(showObjects && knnMap[i][j].object.size()){
+				circle(image, Point(j*amplification + amplification/2,i*amplification + amplification/2), 1, Scalar(255,255,255),2);
+				putText(image, knnMap[i][j].object, Point(j*amplification + amplification/2,i*amplification), cv::FONT_HERSHEY_SIMPLEX,0.5, cv::Scalar(0, 0, 0));
+			}
+		}
+	}
+
+	imshow(windowName, image);
+
+	waitKey();
+
+}
+
 
 void KohonenNetwork::classifyBMU(vector<double> inputWieght, string objectName){
 
-	cout << "Classifying BMU" << endl;
+	cout << "Classifying " << objectName << endl;
 
 	double bestDistance(INFINITY), distance(0);
 	int bestBMU = 0;
@@ -177,11 +221,12 @@ void KohonenNetwork::classifyBMU(vector<double> inputWieght, string objectName){
 		if(distance < bestDistance){
 			bestDistance = distance;
 			bestBMU = i;
-			cout << "BestBMU: "  << bestBMU << endl;
 		}
 
 		distance = 0;
 	}
+
+	cout << "BestBMU: "  << bestBMU << endl;
 
 	knnMap[BMUs[bestBMU].point.x][BMUs[bestBMU].point.y].object = objectName;
 
@@ -240,7 +285,7 @@ int KohonenNetwork::getObject(vector<vector<double> >descriptors, string object)
 
 void KohonenNetwork::loadMap(){
 	ifstream myReadFile;
-	myReadFile.open("knn.txt");
+	myReadFile.open("map.txt");
 
 	string temp;
 	double tempD;
@@ -305,7 +350,7 @@ void KohonenNetwork::loadBmuMap(){
 }
 void KohonenNetwork::saveMap(){
 	ofstream myfile;
-	myfile.open ("map.txt");
+	myfile.open ("knn.txt");
 	myfile << mapSize << " " << weightSize << endl;
 
 	for(int i=0; i<mapSize; i++){

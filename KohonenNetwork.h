@@ -13,10 +13,10 @@
 #include "opencv2/opencv.hpp"
 #include <fstream>
 
-#define totalIterations 103
-#define startLearningRate 10
+#define totalIterations 131
+#define startLearningRate 1
 #define showBMUimage true
-#define classificationPics 12
+#define classificationPics 14
 #define maxThreshold 1.
 #define minThreshold 0.
 #define startPicKoh 1
@@ -40,7 +40,7 @@ public:
 		Point point;
 	};
 
-	string classObjects[12];
+	string classObjects[classificationPics];
 
 	vector<vector<node> > knnMap;
 	vector<vector<double> > BMUcount;
@@ -64,11 +64,8 @@ public:
 	int getObject(vector<vector<double> >descriptor, string object);
 	void saveClassifiers();
 	void loadClassifiers();
-
-
-
-
-
+	void printBMUObjects();
+	void showAmplifiedImage(string windowName, int amplification,  bool showObjects);
 
 private:
 	int mapSize;

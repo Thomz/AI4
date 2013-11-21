@@ -7,7 +7,7 @@
 vector<vector<Mat> > evaluateDescriptors;
 vector<vector<Mat> > evaluateObjects;
 
-KohonenNetwork KNN(100,GRIDHEIGHT*GRIDWIDTH*3);
+KohonenNetwork KNN(25,GRIDHEIGHT*GRIDWIDTH*3);
 
 struct color{
 	vector<double> rgb;
@@ -106,7 +106,7 @@ void readEvaluationSet(){
 void runKohonen(){
 	KNN.printNetwork();
 
-	//KNN.showAsImage("Before");
+	//KNN.showAsImage(" ");
 	//waitKey();
 
 	//double tempD[] = {0.3, 0.4, 0.12, 0.2, 0.6};
@@ -152,9 +152,6 @@ void runKohonen(){
 				cout << customDesc[k] << endl;
 			}*/
 
-			//imshow("temp", singleObjects[j]);
-			//waitKey();
-
 			//cout << "kohonen" << endl;
 			KNN.adjustWeights(customDesc);
 		}
@@ -180,7 +177,6 @@ void classifyKohonen(){
 
 				vector<double> customDesc =  getCustomObjectDescriptor(singleObjects[j]);
 
-				imshow("Picture", singleObjects[j]);
 				string objectName;
 				//cin >> objectName;
 
@@ -216,11 +212,10 @@ void testMethod(){
 
 void scramblePics(){
 	vector<Mat> pics;
-	for(int i = 0; i < 103; i++){
+	for(int i = 1; i < 132; i++){
 		pics.push_back(getImage(i));
 	}
 
-	imshow("hek", pics[0]);
 	int i = 0;
 	while(!pics.empty()){
 		i++;
@@ -258,7 +253,7 @@ void evaluateKohonen(){
 			descriptors.push_back(descriptor);
 		}
 
-		int guess = KNN.getObject(descriptors, "candle");
+		int guess = KNN.getObject(descriptors, "coca-cola");
 
 		if(guess == correctObjects[j])
 			rightCnt++;
@@ -285,35 +280,42 @@ void evaluateKohonen(){
 
 int main() {
 
+	cout <<"start" << endl;
+
 	//scramblePics();
 
 	//testMethod();
 
 	//return 0;
-	KNN.load();
+	//KNN.load();
+	//KNN.printBMUcount();
+	//KNN.printBMUObjects();
+	//KNN.printNetwork();
 
-	cout << KNN.BMUs.size() << endl;
+	//KNN.showAsImage("Knn");
+	//KNN.showAmplifiedImage("Knn-Ampålified",20, true);
+	//waitKey();
 
 	//KNN.printBMUcount();
 
-	//runKohonen();
+	runKohonen();
 
 	//KNN.saveBMUs();
-	//KNN.saveMap();
+	KNN.saveMap();
+	KNN.saveBMUs();
+
 	//cout << "saved" << endl;
 
 	//KNN.getBMUs();
 
-	KNN.showAsImage("KNN");
-	waitKey();
+	//KNN.showAsImage("KNN");
+	//waitKey();
 
 	//classifyKohonen();
 
 	//KNN.saveClassifiers();
 
-	evaluateKohonen();
-
-	//KNN.printBMUcount();
+	//evaluateKohonen();
 
 
 	return 0;

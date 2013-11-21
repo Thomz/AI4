@@ -140,7 +140,7 @@ Mat getImageKohonen(int i, int task, string object){
 			for(int x=0; x<img.cols; x++){
 				if(img.at<Vec3b>(y,x)[2]>5){
 					int tempVal = img.at<Vec3b>(y,x)[2];
-					tempVal+=100;
+					tempVal+=0;
 					if(tempVal>255){
 						img.at<Vec3b>(y,x)[2]=255;
 					}
